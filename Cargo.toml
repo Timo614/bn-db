@@ -1,0 +1,10 @@
+[package]
+name = "bigneon-db"
+version = "0.1.0"
+authors = ["CjS77"]
+license = "BSD-3"
+repository = "https://github.com/big-neon/bn-db/"
+description = "Big Neon database bindings and facade layer"
+documentation = "https://github.com/big-neon/docs"
+
+[dependencies]
