@@ -7,7 +7,7 @@ use self::diesel::prelude::*;
 
 fn main() {
     use bigneon_db::schema::users;
-    let connection = establish_connection();
+    let connection = bigneon_db::establish_connection();
     let results = users::table.filter(users::active.eq(true))
         .limit(5)
         .load::<User>(&connection)
