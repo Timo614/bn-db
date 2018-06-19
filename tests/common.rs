@@ -3,8 +3,7 @@ extern crate diesel;
 
 use diesel::prelude::*;
 
-use bigneon_db::models::{User, NewUser};
-
+use bigneon_db::models::{NewUser, User};
 
 pub fn create_random_email() -> String {
     "joe@tari.com".to_string()
