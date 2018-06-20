@@ -4,6 +4,7 @@ extern crate dotenv;
 
 pub mod models;
 pub mod schema;
+pub mod utils;
 
 use self::models::{NewUser, User};
 use diesel::pg::PgConnection;
