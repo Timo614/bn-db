@@ -4,6 +4,7 @@ use std::fmt;
 pub enum ErrorCode {
     InvalidInput,
     NoResults,
+    InternalError,
     Unknown,
 }
 
@@ -12,46 +13,46 @@ pub fn get_error_message(code: ErrorCode) -> (i32, String) {
     let (code, msg) = match code {
         InvalidInput => (1000, "Invalid input"),
         NoResults => (2000, "No results"),
+        InternalError => (5000, "Internal error"),
         Unknown => (10, "Unknown database error"),
     };
     (code, msg.to_string())
 }
 
 #[derive(Debug)]
-pub struct DatabaseError<'a> {
+pub struct DatabaseError {
     code: i32,
     message: String,
-    cause: Option<&'a Error>,
+    cause: Option<String>,
 }
 
-impl<'a> fmt::Display for DatabaseError<'a> {
+impl fmt::Display for DatabaseError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "[{}] {}", self.code, self.message)?;
-        if let Some(cause) = self.cause {
-            write!(f, "\nCaused by:\n")?;
-            fmt::Display::fmt(&cause, f)?;
+        if let Some(ref cause) = self.cause {
+            write!(f, "\nCaused by: {}", cause)?;
         }
         Ok(())
     }
 }
 
-impl<'a> Error for DatabaseError<'a> {
+impl Error for DatabaseError {
     fn description(&self) -> &str {
         &self.message
     }
-
-    fn cause(&self) -> Option<&Error> {
-        self.cause
-    }
 }
 
-impl<'a> DatabaseError<'a> {
-    fn new(error_code: ErrorCode, cause: Option<&Error>) -> DatabaseError {
+impl DatabaseError {
+    pub fn new(error_code: ErrorCode, cause: Option<&str>) -> DatabaseError {
         let (code, message) = get_error_message(error_code);
+        let description = match cause {
+            Some(err) => Some(String::from(err)),
+            None => None,
+        };
         DatabaseError {
             code,
             message,
-            cause,
+            cause: description,
         }
     }
 }
@@ -77,7 +78,7 @@ fn error_with_known_code() {
 #[test]
 fn unknown_error_with_cause() {
     let cause = DatabaseError::new(ErrorCode::Unknown, None);
-    let err = DatabaseError::new(ErrorCode::InvalidInput, Some(&cause));
+    let err = DatabaseError::new(ErrorCode::InvalidInput, Some(cause.description()));
     assert_eq!(err.description(), "Invalid input");
     assert_eq!(err.code, 1000);
     assert!(err.cause.is_some());
@@ -85,26 +86,22 @@ fn unknown_error_with_cause() {
         format!("{}", err),
         "\
 [1000] Invalid input
-Caused by:
-[10] Unknown database error"
+Caused by: Unknown database error"
     );
 }
 
 #[test]
 fn nested_causes() {
     let cause1 = DatabaseError::new(ErrorCode::Unknown, None);
-    let cause2 = DatabaseError::new(ErrorCode::NoResults, Some(&cause1));
-    let err = DatabaseError::new(ErrorCode::InvalidInput, Some(&cause2));
-    assert_eq!(err.description(), "Invalid input");
+    let cause2 = DatabaseError::new(ErrorCode::NoResults, Some(&format!("{}", cause1)));
+    let err = DatabaseError::new(ErrorCode::InvalidInput, Some(&format!("{}", cause2)));
     assert_eq!(err.code, 1000);
     assert!(err.cause.is_some());
     assert_eq!(
         format!("{}", err),
         "\
 [1000] Invalid input
-Caused by:
-[2000] No results
-Caused by:
-[10] Unknown database error"
+Caused by: [2000] No results
+Caused by: [10] Unknown database error"
     );
 }

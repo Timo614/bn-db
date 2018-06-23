@@ -1,6 +1,8 @@
 #[macro_use]
 extern crate diesel;
+extern crate argon2rs;
 extern crate dotenv;
+extern crate rand;
 
 pub mod models;
 pub mod schema;
@@ -11,6 +13,7 @@ use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use dotenv::dotenv;
 use std::env;
+use utils::passwords::PasswordHash;
 
 const DB_URL: &str = "DATABASE_URL";
 
@@ -26,18 +29,13 @@ pub fn establish_connection() -> PgConnection {
 
 pub fn create_user<'a>(conn: &PgConnection, email: &'a str, password: &'a str) -> User {
     use schema::users;
-    let hashed_pw = hash(&password);
+    let hashed_pw = PasswordHash::generate(&password, None);
     let new_user = NewUser {
         email: &email,
-        hashed_pw: &hashed_pw,
+        hashed_pw: &hashed_pw.to_string(),
     };
     diesel::insert_into(users::table)
         .values(new_user)
         .get_result(conn)
         .expect("Error creating new user")
-}
-
-// replace this with a secure hash + salt or better scheme asap
-fn hash(pw: &str) -> String {
-    format!("INSECURE {}", pw)
 }
