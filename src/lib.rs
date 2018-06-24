@@ -3,6 +3,8 @@ extern crate diesel;
 extern crate argon2rs;
 extern crate dotenv;
 extern crate rand;
+#[macro_use]
+extern crate log;
 
 pub mod models;
 pub mod schema;
@@ -21,6 +23,7 @@ pub fn establish_connection() -> PgConnection {
     // Load .env, but don't freak out if we can't
     dotenv().ok();
     let db_url = env::var(&DB_URL).expect(&format!("{} must be defined.", DB_URL));
+    debug!(target:"db", "Requesting DB connection: {}", db_url);
     PgConnection::establish(&db_url).expect(&format!(
         "Connection to {} could not be established.",
         db_url
@@ -34,6 +37,7 @@ pub fn create_user<'a>(conn: &PgConnection, email: &'a str, password: &'a str) -
         email: &email,
         hashed_pw: &hashed_pw.to_string(),
     };
+    debug!(target:"db", "Adding user {:?}", new_user);
     diesel::insert_into(users::table)
         .values(new_user)
         .get_result(conn)

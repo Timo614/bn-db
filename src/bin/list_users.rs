@@ -1,11 +1,17 @@
 extern crate bigneon_db;
 extern crate diesel;
+#[macro_use]
+extern crate log;
+extern crate log4rs;
 
 use self::bigneon_db::*;
 use self::diesel::prelude::*;
 use self::models::*;
 
 fn main() {
+    log4rs::init_file("log4rs.yaml", Default::default()).unwrap();
+    info!("Starting app");
+    info!(target: "db", "Only in log file");
     use bigneon_db::schema::users;
     let connection = bigneon_db::establish_connection();
     let results = users::table

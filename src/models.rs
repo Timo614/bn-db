@@ -8,7 +8,7 @@ pub struct User {
     pub active: bool,
 }
 
-#[derive(Insertable)]
+#[derive(Insertable, Debug)]
 #[table_name = "users"]
 pub struct NewUser<'a> {
     pub email: &'a str,
