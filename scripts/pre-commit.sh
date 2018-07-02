@@ -22,7 +22,7 @@ fi
 problem_files=()
 
 printf "[pre_commit] rustfmt "
-for file in $(git diff --name-only --cached); do
+for file in $(git diff --name-only --cached --diff-filter=MAR); do
     if [ ${file: -3} == ".rs" ]; then
         rustfmt --skip-children --write-mode=diff $file &>/dev/null
         if [ $? != 0 ]; then

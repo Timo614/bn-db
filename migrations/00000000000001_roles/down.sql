@@ -1,0 +1,11 @@
+DROP ROLE IF EXISTS bigneon_admin;
+DROP ROLE IF EXISTS bigneon_orgowner;
+DROP ROLE IF EXISTS bigneon_orgmember;
+DROP ROLE IF EXISTS bigneon_user;
+DROP ROLE IF EXISTS bigneon_guest;
+DROP FUNCTION IF EXISTS is_admin_role;
+DROP FUNCTION IF EXISTS is_orgowner_role;
+DROP FUNCTION IF EXISTS is_orgmember_role;
+DROP FUNCTION IF EXISTS is_user_role;
+DROP FUNCTION IF EXISTS is_guest_role;
+DROP FUNCTION IF EXISTS create_role_if_not_exists;

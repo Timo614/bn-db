@@ -1,19 +1,30 @@
 extern crate bigneon_db;
 extern crate diesel;
+extern crate dotenv;
 #[macro_use]
 extern crate log;
 extern crate log4rs;
 
-use self::bigneon_db::*;
-use self::diesel::prelude::*;
-use self::models::*;
+use bigneon_db::db;
+use bigneon_db::models::User;
+use bigneon_db::schema::users;
+use diesel::prelude::*;
+use dotenv::dotenv;
+use std::env;
+
+const DATABASE_URL: &str = "DATABASE_URL";
 
 fn main() {
     log4rs::init_file("log4rs.yaml", Default::default()).unwrap();
     info!("Starting app");
     info!(target: "db", "Only in log file");
-    use bigneon_db::schema::users;
-    let connection = bigneon_db::establish_connection();
+
+    // Load .env, but don't freak out if we can't
+    dotenv().ok();
+
+    let database_url =
+        env::var(&DATABASE_URL).expect(&format!("{} must be defined.", DATABASE_URL));
+    let connection = db::establish_connection(&database_url);
     let results = users::table
         .filter(users::active.eq(true))
         .limit(5)

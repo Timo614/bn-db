@@ -1,5 +1,7 @@
 # Big Neon Database
 
+[![Build Status](https://travis-ci.org/big-neon/bn-db.svg?branch=master)](https://travis-ci.org/big-neon/bn-db)
+
 This is the Big Neon Database repository, part of the Big Neon ticketing system.
 
 # Overall project architecture
