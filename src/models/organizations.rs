@@ -1,8 +1,10 @@
+use db::Connectable;
 use diesel;
 use diesel::prelude::*;
 use models::{OrganizationUser, User};
 use schema::{organizations, users};
 use utils::errors::DatabaseError;
+use utils::errors::ErrorCode;
 use uuid::Uuid;
 
 #[derive(Associations, Identifiable, Queryable)]
@@ -19,32 +21,35 @@ pub struct NewOrganization {
 }
 
 impl NewOrganization {
-    pub fn create(&self, connection: &PgConnection) -> Organization {
-        diesel::insert_into(organizations::table)
-            .values(self)
-            .get_result(connection)
-            .expect("Error creating new organization")
+    pub fn commit(&self, conn: &Connectable) -> Result<Organization, DatabaseError> {
+        DatabaseError::wrap(
+            ErrorCode::InsertError,
+            "Could not create new organization",
+            diesel::insert_into(organizations::table)
+                .values(self)
+                .get_result(conn.get_connection()),
+        )
     }
 }
 
 impl Organization {
-    pub fn new(owner_user_id: Uuid) -> Result<NewOrganization, DatabaseError> {
-        Ok(NewOrganization {
+    pub fn create(owner_user_id: Uuid) -> NewOrganization {
+        NewOrganization {
             owner_user_id: owner_user_id,
-        })
+        }
     }
 
-    pub fn users(&self, connection: &PgConnection) -> Vec<User> {
+    pub fn users(&self, conn: &Connectable) -> Vec<User> {
         let organization_users = OrganizationUser::belonging_to(self);
         let organization_owner = users::table
             .find(self.owner_user_id)
-            .first::<User>(connection)
+            .first::<User>(conn.get_connection())
             .expect("Error loading organization owner");
         let mut users = organization_users
             .inner_join(users::table)
             .filter(users::id.ne(self.owner_user_id))
             .select(users::all_columns)
-            .load::<User>(connection)
+            .load::<User>(conn.get_connection())
             .expect("Error loading organization users");
 
         users.insert(0, organization_owner);

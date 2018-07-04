@@ -1,2 +1,1 @@
-mod command;
-pub mod database;
+pub mod project;

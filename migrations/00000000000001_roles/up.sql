@@ -26,9 +26,9 @@ SELECT create_role_if_not_exists('bigneon_user');
 -- An unauthenticated user. Read-only access to some tables
 SELECT create_role_if_not_exists('bigneon_guest');
 
-CREATE OR REPLACE FUNCTION is_admin_role(v int) RETURNS boolean AS 'select (v & 32) > 0;' LANGUAGE SQL IMMUTABLE LEAKPROOF;
-CREATE OR REPLACE FUNCTION is_orgowner_role(v int) RETURNS boolean AS 'select (v & 16) > 0;' LANGUAGE SQL IMMUTABLE LEAKPROOF;
-CREATE OR REPLACE FUNCTION is_orgmember_role(v int) RETURNS boolean AS 'select (v & 8) > 0;' LANGUAGE SQL IMMUTABLE LEAKPROOF;
-CREATE OR REPLACE FUNCTION is_user_role(v int) RETURNS boolean AS 'select (v & 1) > 0;' LANGUAGE SQL IMMUTABLE LEAKPROOF;
+CREATE OR REPLACE FUNCTION is_admin_role(v int) RETURNS boolean AS 'select v=4;' LANGUAGE SQL IMMUTABLE LEAKPROOF;
+CREATE OR REPLACE FUNCTION is_orgowner_role(v int) RETURNS boolean AS 'select v=3;' LANGUAGE SQL IMMUTABLE LEAKPROOF;
+CREATE OR REPLACE FUNCTION is_orgmember_role(v int) RETURNS boolean AS 'select v=2;' LANGUAGE SQL IMMUTABLE LEAKPROOF;
+CREATE OR REPLACE FUNCTION is_user_role(v int) RETURNS boolean AS 'select v=1;' LANGUAGE SQL IMMUTABLE LEAKPROOF;
 CREATE OR REPLACE FUNCTION is_guest_role(v int) RETURNS boolean AS 'select v=0;' LANGUAGE SQL IMMUTABLE LEAKPROOF;
 

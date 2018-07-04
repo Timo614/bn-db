@@ -1,19 +1,19 @@
 use bigneon_db::models::{Organization, OrganizationUser, User};
-use support::database;
+use support::project::TestProject;
 
 #[test]
 fn create_succeeds() {
-    let test_connection = database::establish_test_connection();
-    let user = User::new("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
-        .unwrap()
-        .create(&test_connection);
-    let user2 = User::new("Dan", "dan@tari.com", "555-555-5555", "examplePassword")
-        .unwrap()
-        .create(&test_connection);
-    let organization = Organization::new(user.id).unwrap().create(&test_connection);
-    let organization_user = OrganizationUser::new(organization.id, user2.id)
-        .unwrap()
-        .create(&test_connection);
+    let project = TestProject::new();
+    let user = User::create("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
+        .commit(&project)
+        .unwrap();
+    let user2 = User::create("Dan", "dan@tari.com", "555-555-5555", "examplePassword")
+        .commit(&project)
+        .unwrap();
+    let organization = Organization::create(user.id).commit(&project).unwrap();
+    let organization_user = OrganizationUser::create(organization.id, user2.id)
+        .commit(&project)
+        .unwrap();
 
     assert_eq!(organization_user.user_id, user2.id);
     assert_eq!(organization_user.organization_id, organization.id);

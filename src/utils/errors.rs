@@ -1,9 +1,14 @@
 use std::error::Error;
 use std::fmt;
+use std::fmt::Display;
 
 pub enum ErrorCode {
     InvalidInput,
+    MissingInput,
     NoResults,
+    QueryError,
+    InsertError,
+    ConnectionError,
     InternalError,
     Unknown,
 }
@@ -12,7 +17,11 @@ pub fn get_error_message(code: ErrorCode) -> (i32, String) {
     use self::ErrorCode::*;
     let (code, msg) = match code {
         InvalidInput => (1000, "Invalid input"),
+        MissingInput => (1100, "Missing input"),
         NoResults => (2000, "No results"),
+        QueryError => (3000, "Query Error"),
+        InsertError => (3100, "Could not insert record"),
+        ConnectionError => (4000, "Connection Error"),
         InternalError => (5000, "Internal error"),
         Unknown => (10, "Unknown database error"),
     };
@@ -53,6 +62,21 @@ impl DatabaseError {
             code,
             message,
             cause: description,
+        }
+    }
+
+    /// Wraps the error from a Result into a DatabaseError
+    pub fn wrap<T, E: Display>(
+        error_code: ErrorCode,
+        message: &str,
+        res: Result<T, E>,
+    ) -> Result<T, DatabaseError> {
+        match res {
+            Ok(val) => Ok(val),
+            Err(e) => Err(DatabaseError::new(
+                error_code,
+                Some(&format!("{}, {}", message, e.to_string())),
+            )),
         }
     }
 }

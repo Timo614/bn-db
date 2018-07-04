@@ -1,26 +1,32 @@
 use bigneon_db::models::{Artist, Event, EventArtist, Organization, User, Venue};
-use support::database;
+use support::project::TestProject;
 
 #[test]
 fn create_succeeds() {
-    let test_connection = database::establish_test_connection();
-    let artist = Artist::new("Name").unwrap().create(&test_connection);
-    let venue = Venue::new("Name").unwrap().create(&test_connection);
-    let user = User::new("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
-        .unwrap()
-        .create(&test_connection);
-    let organization = Organization::new(user.id).unwrap().create(&test_connection);
-    let event = Event::new(organization.id, venue.id)
-        .unwrap()
-        .create(&test_connection);
+    let project = TestProject::new();
+    let artist = Artist::create("Name").commit(&project).unwrap();
+    let venue = Venue::create("Name").commit(&project).unwrap();
+    let user = User::create("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
+        .commit(&project)
+        .unwrap();
+    let organization = Organization::create(user.id).commit(&project).unwrap();
+    let event = Event::create(organization.id, venue.id)
+        .commit(&project)
+        .unwrap();
     let rank = 1;
 
     let event_artist = EventArtist::new(event.id, artist.id, rank)
         .unwrap()
-        .create(&test_connection);
+        .create(&project);
 
-    assert_eq!(event_artist.event_id, event.id);
-    assert_eq!(event_artist.artist_id, artist.id);
-    assert_eq!(event_artist.rank, rank);
+    assert_eq!(
+        event_artist.event_id, event.id,
+        "Event foreign key does not match"
+    );
+    assert_eq!(
+        event_artist.artist_id, artist.id,
+        "Artist foreign key does not match"
+    );
+    assert_eq!(event_artist.rank, rank, "Artist rank is not correct");
     assert_eq!(event_artist.id.to_string().is_empty(), false);
 }

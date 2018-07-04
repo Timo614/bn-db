@@ -5,7 +5,7 @@ extern crate dotenv;
 extern crate log;
 extern crate log4rs;
 
-use bigneon_db::db;
+use bigneon_db::db::{Connectable, DatabaseConnection};
 use bigneon_db::models::User;
 use bigneon_db::schema::users;
 use diesel::prelude::*;
@@ -24,11 +24,11 @@ fn main() {
 
     let database_url =
         env::var(&DATABASE_URL).expect(&format!("{} must be defined.", DATABASE_URL));
-    let connection = db::establish_connection(&database_url);
+    let connection = DatabaseConnection::new(&database_url).expect("Error connecting to DB");
     let results = users::table
         .filter(users::active.eq(true))
         .limit(5)
-        .load::<User>(&connection)
+        .load::<User>(connection.get_connection())
         .expect("Error loading users");
 
     println!("Displaying {} users", results.len());

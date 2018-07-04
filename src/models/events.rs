@@ -1,8 +1,10 @@
+use db::Connectable;
 use diesel;
 use diesel::prelude::*;
 use models::{Organization, Venue};
 use schema::events;
 use utils::errors::DatabaseError;
+use utils::errors::ErrorCode;
 use uuid::Uuid;
 
 #[derive(Associations, Identifiable, Queryable)]
@@ -22,19 +24,22 @@ pub struct NewEvent {
 }
 
 impl NewEvent {
-    pub fn create(&self, connection: &PgConnection) -> Event {
-        diesel::insert_into(events::table)
-            .values(self)
-            .get_result(connection)
-            .expect("Error creating new event")
+    pub fn commit(&self, conn: &Connectable) -> Result<Event, DatabaseError> {
+        DatabaseError::wrap(
+            ErrorCode::InsertError,
+            "Could not create new event",
+            diesel::insert_into(events::table)
+                .values(self)
+                .get_result(conn.get_connection()),
+        )
     }
 }
 
 impl Event {
-    pub fn new(organization_id: Uuid, venue_id: Uuid) -> Result<NewEvent, DatabaseError> {
-        Ok(NewEvent {
+    pub fn create(organization_id: Uuid, venue_id: Uuid) -> NewEvent {
+        NewEvent {
             organization_id: organization_id,
             venue_id: venue_id,
-        })
+        }
     }
 }

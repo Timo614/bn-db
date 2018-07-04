@@ -17,6 +17,7 @@ env:
   BIGNEON_DB: bigneon
   DATABASE_URL: postgres://postgres@localhost/bigneon
   TEST_DATABASE_URL: postgres://postgres:password123@localhost/bigneon_test
+  TEST_DATABASE_ADMIN_URL: postgres://postgres:password123@localhost/bigneon_test
 
 before_script:
   - export PATH="$PATH:$HOME/.cargo/bin"

@@ -1,8 +1,10 @@
+use db::Connectable;
 use diesel;
 use diesel::prelude::*;
 use models::{Organization, User};
 use schema::organization_users;
 use utils::errors::DatabaseError;
+use utils::errors::ErrorCode;
 use uuid::Uuid;
 
 #[derive(Associations, Identifiable, Queryable)]
@@ -23,19 +25,22 @@ pub struct NewOrganizationUser {
 }
 
 impl NewOrganizationUser {
-    pub fn create(&self, connection: &PgConnection) -> OrganizationUser {
-        diesel::insert_into(organization_users::table)
-            .values(self)
-            .get_result(connection)
-            .expect("Error creating new organization user")
+    pub fn commit(&self, conn: &Connectable) -> Result<OrganizationUser, DatabaseError> {
+        DatabaseError::wrap(
+            ErrorCode::InsertError,
+            "Could not create new organization user",
+            diesel::insert_into(organization_users::table)
+                .values(self)
+                .get_result(conn.get_connection()),
+        )
     }
 }
 
 impl OrganizationUser {
-    pub fn new(organization_id: Uuid, user_id: Uuid) -> Result<NewOrganizationUser, DatabaseError> {
-        Ok(NewOrganizationUser {
+    pub fn create(organization_id: Uuid, user_id: Uuid) -> NewOrganizationUser {
+        NewOrganizationUser {
             organization_id: organization_id,
             user_id: user_id,
-        })
+        }
     }
 }

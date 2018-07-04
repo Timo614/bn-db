@@ -1,11 +1,11 @@
 use bigneon_db::models::Artist;
-use support::database;
+use support::project::TestProject;
 
 #[test]
 fn create_succeeds() {
-    let test_connection = database::establish_test_connection();
+    let project = TestProject::new();
     let name = "Name";
-    let artist = Artist::new(&name).unwrap().create(&test_connection);
+    let artist = Artist::create(&name).commit(&project).unwrap();
     assert_eq!(name, artist.name);
     assert_eq!(artist.id.to_string().is_empty(), false);
 }

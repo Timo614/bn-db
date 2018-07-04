@@ -1,16 +1,16 @@
 use bigneon_db::models::User;
-use support::database;
+use support::project::TestProject;
 
 #[test]
 fn create_succeeds() {
-    let test_connection = database::establish_test_connection();
+    let project = TestProject::new();
     let name = "Jeff";
     let email = "jeff@tari.com";
     let phone_number = "555-555-5555";
     let password = "examplePassword";
-    let user = User::new(name, email, phone_number, password)
-        .unwrap()
-        .create(&test_connection);
+    let user = User::create(name, email, phone_number, password)
+        .commit(&project)
+        .unwrap();
 
     assert_eq!(user.name, name);
     assert_eq!(user.email, email);

@@ -1,3 +1,4 @@
+use db::Connectable;
 use diesel;
 use diesel::prelude::*;
 use models::{Artist, Event};
@@ -25,10 +26,10 @@ pub struct NewEventArtist {
 }
 
 impl NewEventArtist {
-    pub fn create(&self, connection: &PgConnection) -> EventArtist {
+    pub fn create(&self, conn: &Connectable) -> EventArtist {
         diesel::insert_into(event_artists::table)
             .values(self)
-            .get_result(connection)
+            .get_result(conn.get_connection())
             .expect("Error creating new event artist")
     }
 }

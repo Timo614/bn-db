@@ -1,8 +1,9 @@
 use chrono::NaiveDateTime;
+use db::Connectable;
 use diesel;
 use diesel::prelude::*;
 use schema::users;
-use utils::errors::DatabaseError;
+use utils::errors::{DatabaseError, ErrorCode};
 use utils::passwords::PasswordHash;
 use uuid::Uuid;
 
@@ -29,28 +30,23 @@ pub struct NewUser {
 }
 
 impl NewUser {
-    pub fn create(&self, connection: &PgConnection) -> User {
-        diesel::insert_into(users::table)
+    pub fn commit(&self, conn: &Connectable) -> Result<User, DatabaseError> {
+        let res = diesel::insert_into(users::table)
             .values(self)
-            .get_result(connection)
-            .expect("Error creating new user")
+            .get_result(conn.get_connection());
+        DatabaseError::wrap(ErrorCode::InsertError, "Could not create new user", res)
     }
 }
 
 impl User {
-    pub fn new(
-        name: &str,
-        email: &str,
-        phone: &str,
-        password: &str,
-    ) -> Result<NewUser, DatabaseError> {
+    pub fn create(name: &str, email: &str, phone: &str, password: &str) -> NewUser {
         let hash = PasswordHash::generate(password, None);
-        Ok(NewUser {
+        NewUser {
             name: String::from(name),
             email: String::from(email),
             phone: String::from(phone),
             hashed_pw: hash.to_string(),
-        })
+        }
     }
 
     pub fn check_password(&self, password: &str) -> bool {
