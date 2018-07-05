@@ -1,4 +1,4 @@
-pub use self::artists::Artist;
+pub use self::artists::{Artist, NewArtist};
 pub use self::event_artists::EventArtist;
 pub use self::event_histories::EventHistory;
 pub use self::events::Event;

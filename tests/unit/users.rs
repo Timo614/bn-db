@@ -2,7 +2,7 @@ use bigneon_db::models::User;
 use support::project::TestProject;
 
 #[test]
-fn create_succeeds() {
+fn create() {
     let project = TestProject::new();
     let name = "Jeff";
     let email = "jeff@tari.com";

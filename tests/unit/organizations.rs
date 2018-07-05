@@ -2,7 +2,7 @@ use bigneon_db::models::{Organization, OrganizationUser, User};
 use support::project::TestProject;
 
 #[test]
-fn create_succeeds() {
+fn create() {
     let project = TestProject::new();
     let user = User::create("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
         .commit(&project)
@@ -14,7 +14,7 @@ fn create_succeeds() {
 }
 
 #[test]
-fn users_association() {
+fn users() {
     let project = TestProject::new();
     let user = User::create("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
         .commit(&project)
