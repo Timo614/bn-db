@@ -35,6 +35,18 @@ fn all() {
     assert_eq!(1, found_artists.len());
     assert_eq!(found_artists[0].id, artist.id);
     assert_eq!(found_artists[0].name, artist.name);
+
+    let name2 = "Name 2";
+    let artist2 = Artist::create(&name2).commit(&project).unwrap();
+    assert_eq!(name2, artist2.name);
+    assert_eq!(artist2.id.to_string().is_empty(), false);
+
+    let found_artists = Artist::all(&project).unwrap();
+    assert_eq!(2, found_artists.len());
+    assert_eq!(found_artists[0].id, artist.id);
+    assert_eq!(found_artists[0].name, artist.name);
+    assert_eq!(found_artists[1].id, artist2.id);
+    assert_eq!(found_artists[1].name, artist2.name);
 }
 
 #[test]
