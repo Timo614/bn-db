@@ -21,7 +21,7 @@ impl TestProject {
         let connection =
             DatabaseConnection::new(&conn_str).expect("Could not connect to test database");
         let admin = PgConnection::establish(&admin_str)
-            .expect("Could not get admin access to ttest database");
+            .expect("Could not get admin access to admin test database");
         connection
             .get_connection()
             .begin_test_transaction()
