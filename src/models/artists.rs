@@ -37,32 +37,47 @@ impl Artist {
         }
     }
 
-    pub fn all(conn: &Connectable) -> Vec<Artist> {
-        artists::table
-            .load(conn.get_connection())
-            .expect("Unable to load artists")
+    pub fn all(conn: &Connectable) -> Result<Vec<Artist>, DatabaseError> {
+        DatabaseError::wrap(
+            ErrorCode::QueryError,
+            "Unable to load artists",
+            artists::table.load(conn.get_connection()),
+        )
     }
 
-    pub fn find(id: &Uuid, conn: &Connectable) -> Artist {
-        artists::table
-            .find(id)
-            .first::<Artist>(conn.get_connection())
-            .expect("Error loading artist")
+    pub fn find(id: &Uuid, conn: &Connectable) -> Result<Artist, DatabaseError> {
+        DatabaseError::wrap(
+            ErrorCode::QueryError,
+            "Error loading artist",
+            artists::table
+                .find(id)
+                .first::<Artist>(conn.get_connection()),
+        )
     }
 
-    pub fn update_attributes(&self, artist_parameters: &NewArtist, conn: &Connectable) -> Artist {
+    pub fn update_attributes(
+        &self,
+        artist_parameters: &NewArtist,
+        conn: &Connectable,
+    ) -> Result<Artist, DatabaseError> {
         use schema::artists::dsl::*;
-        diesel::update(artists.filter(id.eq(self.id)))
-            .set(name.eq(&artist_parameters.name))
-            .get_result(conn.get_connection())
-            .expect("Error updating artist")
+
+        DatabaseError::wrap(
+            ErrorCode::UpdateError,
+            "Error updating artist",
+            diesel::update(artists.filter(id.eq(self.id)))
+                .set(name.eq(&artist_parameters.name))
+                .get_result(conn.get_connection()),
+        )
     }
 
-    pub fn destroy(&self, conn: &Connectable) -> bool {
+    pub fn destroy(&self, conn: &Connectable) -> Result<usize, DatabaseError> {
         use schema::artists::dsl::*;
-        let deleted_count = diesel::delete(artists.filter(id.eq(self.id)))
-            .execute(conn.get_connection())
-            .expect("Failed to destroy artist record");
-        deleted_count > 0
+
+        DatabaseError::wrap(
+            ErrorCode::DeleteError,
+            "Failed to destroy artist record",
+            diesel::delete(artists.filter(id.eq(self.id))).execute(conn.get_connection()),
+        )
     }
 }
