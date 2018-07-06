@@ -38,12 +38,14 @@ fn all() {
 }
 
 #[test]
-fn update_attributes(){
+fn update_attributes() {
     let project = TestProject::new();
     let name = "Old Name";
     let artist = Artist::create(&name).commit(&project).unwrap();
 
-    let artist_parameters = NewArtist{name: "New Name".to_string()};
+    let artist_parameters = NewArtist {
+        name: "New Name".to_string(),
+    };
     let updated_artist = artist.update_attributes(&artist_parameters, &project);
 
     assert_eq!(updated_artist.id, artist.id);
@@ -53,7 +55,7 @@ fn update_attributes(){
 
 #[test]
 #[should_panic]
-fn destroy(){
+fn destroy() {
     let project = TestProject::new();
     let name = "Old Name";
     let artist = Artist::create(&name).commit(&project).unwrap();

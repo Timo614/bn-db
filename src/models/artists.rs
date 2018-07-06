@@ -38,11 +38,16 @@ impl Artist {
     }
 
     pub fn all(conn: &Connectable) -> Vec<Artist> {
-        artists::table.load(conn.get_connection()).expect("Unable to load artists")
+        artists::table
+            .load(conn.get_connection())
+            .expect("Unable to load artists")
     }
 
     pub fn find(id: &Uuid, conn: &Connectable) -> Artist {
-        artists::table.find(id).first::<Artist>(conn.get_connection()).expect("Error loading artist")
+        artists::table
+            .find(id)
+            .first::<Artist>(conn.get_connection())
+            .expect("Error loading artist")
     }
 
     pub fn update_attributes(&self, artist_parameters: &NewArtist, conn: &Connectable) -> Artist {
@@ -55,7 +60,9 @@ impl Artist {
 
     pub fn destroy(&self, conn: &Connectable) -> bool {
         use schema::artists::dsl::*;
-        let deleted_count = diesel::delete(artists.filter(id.eq(self.id))).execute(conn.get_connection()).expect("Failed to destroy artist record");
+        let deleted_count = diesel::delete(artists.filter(id.eq(self.id)))
+            .execute(conn.get_connection())
+            .expect("Failed to destroy artist record");
         deleted_count > 0
     }
 }
