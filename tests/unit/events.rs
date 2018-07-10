@@ -8,7 +8,9 @@ fn create() {
     let user = User::create("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
         .commit(&project)
         .unwrap();
-    let organization = Organization::create(user.id).commit(&project).unwrap();
+    let organization = Organization::create(user.id, "Organization")
+        .commit(&project)
+        .unwrap();
     let event = Event::create(organization.id, venue.id)
         .commit(&project)
         .unwrap();

@@ -8,7 +8,9 @@ fn create() {
         .commit(&project)
         .unwrap();
     let venue = Venue::create("Name").commit(&project).unwrap();
-    let organization = Organization::create(user.id).commit(&project).unwrap();
+    let organization = Organization::create(user.id, "Organization")
+        .commit(&project)
+        .unwrap();
     let organization_venue = OrganizationVenue::create(organization.id, venue.id)
         .commit(&project)
         .unwrap();

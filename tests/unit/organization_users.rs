@@ -10,7 +10,9 @@ fn create() {
     let user2 = User::create("Dan", "dan@tari.com", "555-555-5555", "examplePassword")
         .commit(&project)
         .unwrap();
-    let organization = Organization::create(user.id).commit(&project).unwrap();
+    let organization = Organization::create(user.id, "Organization")
+        .commit(&project)
+        .unwrap();
     let organization_user = OrganizationUser::create(organization.id, user2.id)
         .commit(&project)
         .unwrap();

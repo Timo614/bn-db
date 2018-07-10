@@ -7,17 +7,27 @@ use utils::errors::DatabaseError;
 use utils::errors::ErrorCode;
 use uuid::Uuid;
 
-#[derive(Associations, Identifiable, Queryable)]
+#[derive(Identifiable, Associations, Queryable, AsChangeset)]
 #[belongs_to(User, foreign_key = "owner_user_id")]
+#[derive(Serialize, PartialEq, Debug)]
+#[table_name = "organizations"]
 pub struct Organization {
     pub id: Uuid,
     pub owner_user_id: Uuid,
+    pub name: String,
+    pub address: Option<String>,
+    pub city: Option<String>,
+    pub state: Option<String>,
+    pub country: Option<String>,
+    pub zip: Option<String>,
+    pub phone: Option<String>,
 }
 
 #[derive(Insertable)]
 #[table_name = "organizations"]
 pub struct NewOrganization {
     pub owner_user_id: Uuid,
+    pub name: String,
 }
 
 impl NewOrganization {
@@ -33,10 +43,21 @@ impl NewOrganization {
 }
 
 impl Organization {
-    pub fn create(owner_user_id: Uuid) -> NewOrganization {
+    pub fn create(owner_user_id: Uuid, name: &str) -> NewOrganization {
         NewOrganization {
             owner_user_id: owner_user_id,
+            name: name.into(),
         }
+    }
+
+    pub fn update(&self, conn: &Connectable) -> Result<Organization, DatabaseError> {
+        DatabaseError::wrap(
+            ErrorCode::UpdateError,
+            "Could not update organization",
+            diesel::update(self)
+                .set(self)
+                .get_result(conn.get_connection()),
+        )
     }
 
     pub fn users(&self, conn: &Connectable) -> Vec<User> {
@@ -54,5 +75,21 @@ impl Organization {
 
         users.insert(0, organization_owner);
         users
+    }
+    pub fn find(id: &Uuid, conn: &Connectable) -> Result<Organization, DatabaseError> {
+        DatabaseError::wrap(
+            ErrorCode::QueryError,
+            "Error loading organization",
+            organizations::table
+                .find(id)
+                .first::<Organization>(conn.get_connection()),
+        )
+    }
+    pub fn all(conn: &Connectable) -> Result<Vec<Organization>, DatabaseError> {
+        DatabaseError::wrap(
+            ErrorCode::QueryError,
+            "Unable to load all organizations",
+            organizations::table.load(conn.get_connection()),
+        )
     }
 }
