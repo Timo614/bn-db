@@ -1,3 +1,4 @@
+use serde::ser::{Serialize, SerializeStruct, Serializer};
 use std::error::Error;
 use std::fmt;
 use std::fmt::Display;
@@ -52,6 +53,20 @@ impl fmt::Display for DatabaseError {
 impl Error for DatabaseError {
     fn description(&self) -> &str {
         &self.message
+    }
+}
+
+impl Serialize for DatabaseError {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        // 3 is the number of fields in the struct.
+        let mut state = serializer.serialize_struct("DatabaseError", 3)?;
+        state.serialize_field("code", &self.code)?;
+        state.serialize_field("message", &self.message)?;
+        state.serialize_field("cause", &self.cause)?;
+        state.end()
     }
 }
 

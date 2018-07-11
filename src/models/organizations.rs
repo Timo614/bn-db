@@ -9,7 +9,7 @@ use uuid::Uuid;
 
 #[derive(Identifiable, Associations, Queryable, AsChangeset)]
 #[belongs_to(User, foreign_key = "owner_user_id")]
-#[derive(Serialize, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Debug)]
 #[table_name = "organizations"]
 pub struct Organization {
     pub id: Uuid,
@@ -23,7 +23,7 @@ pub struct Organization {
     pub phone: Option<String>,
 }
 
-#[derive(Insertable)]
+#[derive(Insertable, Serialize, Deserialize, PartialEq, Debug)]
 #[table_name = "organizations"]
 pub struct NewOrganization {
     pub owner_user_id: Uuid,
