@@ -2,6 +2,7 @@ use chrono::NaiveDateTime;
 use db::Connectable;
 use diesel;
 use diesel::prelude::*;
+use models::Roles;
 use schema::users;
 use utils::errors::{DatabaseError, ErrorCode};
 use utils::passwords::PasswordHash;
@@ -17,7 +18,7 @@ pub struct User {
     pub created_at: NaiveDateTime,
     pub last_used: Option<NaiveDateTime>,
     pub active: bool,
-    pub role: i32,
+    pub role: Vec<String>,
 }
 
 #[derive(Insertable)]
@@ -27,6 +28,7 @@ pub struct NewUser {
     pub email: String,
     pub phone: String,
     pub hashed_pw: String,
+    role: Vec<String>,
 }
 
 impl NewUser {
@@ -46,6 +48,7 @@ impl User {
             email: String::from(email),
             phone: String::from(phone),
             hashed_pw: hash.to_string(),
+            role: vec![Roles::Guest.to_string()],
         }
     }
 

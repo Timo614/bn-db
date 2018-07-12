@@ -8,15 +8,8 @@ CREATE TABLE users (
   created_at TIMESTAMP NOT NULL DEFAULT now(),
   last_used TIMESTAMP DEFAULT NULL,
   active BOOLEAN NOT NULL DEFAULT 't',
-  role integer NOT NULL DEFAULT 1 -- Registered user
+  role text[] NOT NULL
 );
-
--- In general users have READ_ONLY access to the users table
-REVOKE ALL ON users FROM PUBLIC;
-
-GRANT SELECT, INSERT, UPDATE ON users TO bigneon_admin;
-GRANT SELECT, UPDATE, INSERT ON users TO bigneon_orgowner;
-GRANT SELECT, UPDATE ON users TO bigneon_orgmember, bigneon_user;
 
 -- Indices
 CREATE INDEX index_users_uuid ON users (id);

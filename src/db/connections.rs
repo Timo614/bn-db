@@ -1,4 +1,3 @@
-use super::roles::*;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use dotenv::dotenv;
@@ -15,7 +14,6 @@ pub trait Connectable {
 pub struct DatabaseConnection {
     connection: PgConnection,
     connection_string: String,
-    role: u8,
 }
 
 impl DatabaseConnection {
@@ -58,13 +56,10 @@ impl DatabaseConnection {
             "Could not connect to database",
             PgConnection::establish(&connection_string),
         )?;
-        let role = ADMIN;
-        let mut db = DatabaseConnection {
-            role: ADMIN,
+        let db = DatabaseConnection {
             connection,
             connection_string: connection_string.into(),
         };
-        db.set_role(role)?;
         Ok(db)
     }
 
@@ -74,21 +69,6 @@ impl DatabaseConnection {
 
     pub fn url(&self) -> &str {
         &self.connection_string
-    }
-
-    pub fn get_current_role(&self) -> u8 {
-        self.role
-    }
-
-    pub fn set_role(&mut self, new_role: u8) -> Result<u8, DatabaseError> {
-        let role_name = get_role_name(new_role);
-        info!("Setting role to {}", role_name);
-        DatabaseError::wrap(
-            ErrorCode::QueryError,
-            "Error setting permissions",
-            self.connection.execute(&format!("SET ROLE {};", role_name)),
-        )?;
-        Ok(new_role)
     }
 }
 

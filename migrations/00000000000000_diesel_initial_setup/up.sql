@@ -34,3 +34,6 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+-- In general users have READ_ONLY access
+REVOKE ALL ON SCHEMA public FROM PUBLIC;

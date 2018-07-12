@@ -80,7 +80,7 @@ table! {
         created_at -> Timestamp,
         last_used -> Nullable<Timestamp>,
         active -> Bool,
-        role -> Int4,
+        role -> Array<Text>,
     }
 }
 

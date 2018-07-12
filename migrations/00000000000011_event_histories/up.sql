@@ -7,13 +7,6 @@ CREATE TABLE event_histories (
   protocol_reference_hash VARCHAR(255) NOT NULL
 );
 
--- In general users have READ_ONLY access to the event_histories table
-REVOKE ALL ON event_histories FROM PUBLIC;
-
-GRANT SELECT, INSERT, UPDATE ON event_histories TO bigneon_admin;
-GRANT SELECT, UPDATE, INSERT ON event_histories TO bigneon_orgowner, bigneon_orgmember;
-GRANT SELECT ON event_histories TO bigneon_user;
-
 -- Indices
 CREATE INDEX index_event_histories_event_id ON event_histories (event_id);
 CREATE INDEX index_event_histories_order_id ON event_histories (order_id);
