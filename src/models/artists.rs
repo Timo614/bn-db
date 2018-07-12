@@ -6,7 +6,7 @@ use utils::errors::DatabaseError;
 use utils::errors::ErrorCode;
 use uuid::Uuid;
 
-#[derive(Associations, Identifiable, Queryable, Serialize)]
+#[derive(Associations, Deserialize, Identifiable, Queryable, Serialize)]
 pub struct Artist {
     pub id: Uuid,
     pub name: String,

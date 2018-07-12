@@ -5,8 +5,8 @@ pub use self::events::Event;
 pub use self::orders::Order;
 pub use self::organization_users::OrganizationUser;
 pub use self::organization_venues::OrganizationVenue;
-pub use self::roles::Roles;
 pub use self::organizations::*;
+pub use self::roles::Roles;
 pub use self::users::User;
 pub use self::venues::Venue;
 
