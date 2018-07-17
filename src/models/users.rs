@@ -4,7 +4,6 @@ use diesel;
 use diesel::prelude::*;
 use models::Roles;
 use schema::users;
-use serde_json;
 use utils::errors::{DatabaseError, ErrorCode};
 use utils::passwords::PasswordHash;
 use uuid::Uuid;
@@ -95,7 +94,12 @@ impl User {
 
 impl From<User> for DisplayUser {
     fn from(user: User) -> Self {
-        let serialized_user = serde_json::to_string(&user).unwrap();
-        serde_json::from_str(&serialized_user).unwrap()
+        DisplayUser {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            created_at: user.created_at,
+        }
     }
 }
