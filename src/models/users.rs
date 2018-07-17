@@ -52,6 +52,16 @@ impl User {
         }
     }
 
+    pub fn find_by_email(email: &str, conn: &Connectable) -> Result<User, DatabaseError> {
+        DatabaseError::wrap(
+            ErrorCode::QueryError,
+            "Error loading user",
+            users::table
+                .filter(users::email.eq(email))
+                .first::<User>(conn.get_connection()),
+        )
+    }
+
     pub fn check_password(&self, password: &str) -> bool {
         let hash = match PasswordHash::from_str(&self.hashed_pw) {
             Ok(h) => h,
