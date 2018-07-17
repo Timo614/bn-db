@@ -4,11 +4,22 @@ use diesel;
 use diesel::prelude::*;
 use models::Roles;
 use schema::users;
+use serde_json;
 use utils::errors::{DatabaseError, ErrorCode};
 use utils::passwords::PasswordHash;
 use uuid::Uuid;
 
-#[derive(Queryable)]
+#[derive(Insertable)]
+#[table_name = "users"]
+pub struct NewUser {
+    pub name: String,
+    pub email: String,
+    pub phone: String,
+    pub hashed_pw: String,
+    role: Vec<String>,
+}
+
+#[derive(Queryable, Serialize)]
 pub struct User {
     pub id: Uuid,
     pub name: String,
@@ -21,14 +32,13 @@ pub struct User {
     pub role: Vec<String>,
 }
 
-#[derive(Insertable)]
-#[table_name = "users"]
-pub struct NewUser {
+#[derive(Deserialize, Serialize)]
+pub struct DisplayUser {
+    pub id: Uuid,
     pub name: String,
     pub email: String,
     pub phone: String,
-    pub hashed_pw: String,
-    role: Vec<String>,
+    pub created_at: NaiveDateTime,
 }
 
 impl NewUser {
@@ -76,5 +86,16 @@ impl User {
             Err(_) => return false,
         };
         hash.verify(password)
+    }
+
+    pub fn for_display(self) -> DisplayUser {
+        self.into()
+    }
+}
+
+impl From<User> for DisplayUser {
+    fn from(user: User) -> Self {
+        let serialized_user = serde_json::to_string(&user).unwrap();
+        serde_json::from_str(&serialized_user).unwrap()
     }
 }
