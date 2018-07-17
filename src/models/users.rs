@@ -52,6 +52,14 @@ impl User {
         }
     }
 
+    pub fn find(id: &Uuid, conn: &Connectable) -> Result<User, DatabaseError> {
+        DatabaseError::wrap(
+            ErrorCode::QueryError,
+            "Error loading user",
+            users::table.find(id).first::<User>(conn.get_connection()),
+        )
+    }
+
     pub fn find_by_email(email: &str, conn: &Connectable) -> Result<User, DatabaseError> {
         DatabaseError::wrap(
             ErrorCode::QueryError,

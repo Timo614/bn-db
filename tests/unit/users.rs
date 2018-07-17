@@ -1,5 +1,6 @@
 use bigneon_db::models::User;
 use support::project::TestProject;
+use uuid::Uuid;
 
 #[test]
 fn commit() {
@@ -18,6 +19,27 @@ fn commit() {
     assert_ne!(user.hashed_pw, password);
     assert_eq!(user.hashed_pw.is_empty(), false);
     assert_eq!(user.id.to_string().is_empty(), false);
+}
+
+#[test]
+fn find() {
+    let project = TestProject::new();
+    let user = User::create("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
+        .commit(&project)
+        .unwrap();
+
+    let found_user = match User::find(&user.id, &project) {
+        Ok(user) => user,
+        Err(_e) => panic!("User was not found"),
+    };
+    assert_eq!(found_user.id, user.id);
+    assert_eq!(found_user.email, user.email);
+
+    let invalid_user = match User::find(&Uuid::new_v4(), &project) {
+        Ok(_user) => false,
+        Err(_e) => true,
+    };
+    assert!(invalid_user, "User incorrectly returned when id invalid");
 }
 
 #[test]
