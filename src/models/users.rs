@@ -18,7 +18,7 @@ pub struct NewUser {
     role: Vec<String>,
 }
 
-#[derive(Queryable, Serialize)]
+#[derive(Queryable, Serialize, Identifiable)]
 pub struct User {
     pub id: Uuid,
     pub name: String,
@@ -85,6 +85,18 @@ impl User {
             Err(_) => return false,
         };
         hash.verify(password)
+    }
+
+    pub fn add_role(&self, r: Roles, conn: &Connectable) -> Result<User, DatabaseError> {
+        let mut new_roles = self.role.clone();
+        new_roles.push(r.to_string());
+        DatabaseError::wrap(
+            ErrorCode::UpdateError,
+            "Could not add role to user",
+            diesel::update(self)
+                .set(users::role.eq(&new_roles))
+                .get_result(conn.get_connection()),
+        )
     }
 
     pub fn for_display(self) -> DisplayUser {

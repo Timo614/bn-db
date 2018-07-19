@@ -1,3 +1,4 @@
+use bigneon_db::models::Roles;
 use bigneon_db::models::User;
 use support::project::TestProject;
 use uuid::Uuid;
@@ -72,4 +73,17 @@ fn for_display() {
     let display_user = user.for_display();
 
     assert_eq!(display_user.id, user_id);
+}
+
+#[test]
+fn add_role() {
+    let project = TestProject::new();
+    let user = User::create("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
+        .commit(&project)
+        .unwrap();
+
+    user.add_role(Roles::Admin, &project);
+
+    let user2 = User::find(&user.id, &project).unwrap();
+    assert_eq!(user2.role, vec!["Guest", "Admin"]);
 }
