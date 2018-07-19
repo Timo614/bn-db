@@ -1,5 +1,6 @@
 use bigneon_db::models::{Artist, NewArtist};
 use support::project::TestProject;
+use uuid::Uuid;
 
 #[test]
 fn commit() {
@@ -13,14 +14,19 @@ fn commit() {
 #[test]
 fn find() {
     let project = TestProject::new();
-    let name = "Name";
-    let artist = Artist::create(&name).commit(&project).unwrap();
-    assert_eq!(name, artist.name);
-    assert_eq!(artist.id.to_string().is_empty(), false);
+    let artist = Artist::create("Name").commit(&project).unwrap();
 
-    let found_artist = Artist::find(&artist.id, &project).unwrap();
+    let found_artist = Artist::find(&artist.id, &project).expect("Artist was not found");
     assert_eq!(found_artist.id, artist.id);
     assert_eq!(found_artist.name, artist.name);
+
+    assert!(
+        match Artist::find(&Uuid::new_v4(), &project) {
+            Ok(_artist) => false,
+            Err(_e) => true,
+        },
+        "Artist incorrectly returned when id invalid"
+    );
 }
 
 #[test]

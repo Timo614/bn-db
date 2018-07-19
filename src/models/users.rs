@@ -8,7 +8,17 @@ use utils::errors::{DatabaseError, ErrorCode};
 use utils::passwords::PasswordHash;
 use uuid::Uuid;
 
-#[derive(Queryable)]
+#[derive(Insertable)]
+#[table_name = "users"]
+pub struct NewUser {
+    pub name: String,
+    pub email: String,
+    pub phone: String,
+    pub hashed_pw: String,
+    role: Vec<String>,
+}
+
+#[derive(Queryable, Serialize)]
 pub struct User {
     pub id: Uuid,
     pub name: String,
@@ -21,14 +31,13 @@ pub struct User {
     pub role: Vec<String>,
 }
 
-#[derive(Insertable)]
-#[table_name = "users"]
-pub struct NewUser {
+#[derive(Deserialize, Serialize)]
+pub struct DisplayUser {
+    pub id: Uuid,
     pub name: String,
     pub email: String,
     pub phone: String,
-    pub hashed_pw: String,
-    role: Vec<String>,
+    pub created_at: NaiveDateTime,
 }
 
 impl NewUser {
@@ -52,6 +61,14 @@ impl User {
         }
     }
 
+    pub fn find(id: &Uuid, conn: &Connectable) -> Result<User, DatabaseError> {
+        DatabaseError::wrap(
+            ErrorCode::QueryError,
+            "Error loading user",
+            users::table.find(id).first::<User>(conn.get_connection()),
+        )
+    }
+
     pub fn find_by_email(email: &str, conn: &Connectable) -> Result<User, DatabaseError> {
         DatabaseError::wrap(
             ErrorCode::QueryError,
@@ -68,5 +85,21 @@ impl User {
             Err(_) => return false,
         };
         hash.verify(password)
+    }
+
+    pub fn for_display(self) -> DisplayUser {
+        self.into()
+    }
+}
+
+impl From<User> for DisplayUser {
+    fn from(user: User) -> Self {
+        DisplayUser {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            created_at: user.created_at,
+        }
     }
 }
