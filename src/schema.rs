@@ -29,6 +29,9 @@ table! {
         id -> Uuid,
         organization_id -> Uuid,
         venue_id -> Uuid,
+        created_at -> Timestamp,
+        ticket_sell_date -> Timestamp,
+        event_start -> Timestamp,
     }
 }
 
@@ -88,6 +91,12 @@ table! {
     venues (id) {
         id -> Uuid,
         name -> Text,
+        address -> Nullable<Text>,
+        city -> Nullable<Text>,
+        state -> Nullable<Text>,
+        country -> Nullable<Text>,
+        zip -> Nullable<Text>,
+        phone -> Nullable<Text>,
     }
 }
 

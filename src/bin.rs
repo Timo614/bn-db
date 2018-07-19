@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate diesel_migrations;
+extern crate chrono;
 extern crate clap;
 extern crate diesel;
 
