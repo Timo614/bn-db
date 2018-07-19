@@ -1,4 +1,5 @@
 extern crate bigneon_db;
+extern crate chrono;
 extern crate diesel;
 extern crate dotenv;
 extern crate uuid;
