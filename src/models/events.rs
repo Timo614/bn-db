@@ -66,6 +66,31 @@ impl Event {
             events::table.find(id).first::<Event>(conn.get_connection()),
         )
     }
+    pub fn find_all_events_from_venue(
+        venue_id: &Uuid,
+        conn: &Connectable,
+    ) -> Result<Vec<Event>, DatabaseError> {
+        DatabaseError::wrap(
+            ErrorCode::QueryError,
+            "Error loading event via venue",
+            events::table
+                .filter(events::venue_id.eq(venue_id))
+                .load(conn.get_connection()),
+        )
+    }
+    pub fn find_all_events_from_organization(
+        organization_id: &Uuid,
+        conn: &Connectable,
+    ) -> Result<Vec<Event>, DatabaseError> {
+        DatabaseError::wrap(
+            ErrorCode::QueryError,
+            "Error loading events via organization",
+            events::table
+                .filter(events::organization_id.eq(organization_id))
+                .load(conn.get_connection()),
+        )
+    }
+
     pub fn all(conn: &Connectable) -> Result<Vec<Event>, DatabaseError> {
         DatabaseError::wrap(
             ErrorCode::QueryError,
