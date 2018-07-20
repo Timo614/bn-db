@@ -1,5 +1,5 @@
-use bigneon_db::models::Artist;
 use bigneon_db::models::artists::UserEditableAttributes;
+use bigneon_db::models::Artist;
 use support::project::TestProject;
 use uuid::Uuid;
 
