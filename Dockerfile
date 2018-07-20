@@ -1,7 +1,7 @@
 FROM rust:1.26
 
 WORKDIR /usr/src/bn-db
-ADD Cargo.toml Cargo.lock ./
+ADD Cargo.toml ./
 ADD tests tests/
 ADD src src/
 

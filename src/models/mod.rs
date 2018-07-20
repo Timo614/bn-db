@@ -1,14 +1,14 @@
 pub use self::artists::{Artist, NewArtist};
 pub use self::event_artists::EventArtist;
 pub use self::event_histories::EventHistory;
-pub use self::events::{Event, NewEvent};
+pub use self::events::*;
 pub use self::orders::Order;
 pub use self::organization_users::OrganizationUser;
 pub use self::organization_venues::OrganizationVenue;
 pub use self::organizations::*;
 pub use self::roles::Roles;
 pub use self::users::User;
-pub use self::venues::{NewVenue, Venue};
+pub use self::venues::*;
 
 mod artists;
 mod event_artists;

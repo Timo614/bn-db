@@ -131,10 +131,10 @@ fn create_db_and_user(matches: &ArgMatches) {
         .expect("Password was not provided");
     println!("Creating user");
 
-    let dbConnection = DatabaseConnection::new(conn_string).unwrap();
+    let db_Connection = DatabaseConnection::new(conn_string).unwrap();
     let user = models::User::create("System Administrator", username, phone, password)
-        .commit(&dbConnection)
+        .commit(&db_Connection)
         .expect("Failed to create system admin");
-    user.add_role(Roles::Admin, &dbConnection)
+    user.add_role(Roles::Admin, &db_Connection)
         .expect("Could not assign System Administrator role to the user");
 }
