@@ -15,6 +15,7 @@ fn create() {
         .commit(&project)
         .unwrap();
     let event = Event::create(
+        "NewEvent",
         organization.id,
         venue.id,
         NaiveDate::from_ymd(2016, 7, 8).and_hms(9, 10, 11),

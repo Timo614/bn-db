@@ -14,6 +14,7 @@ fn create() {
         .commit(&project)
         .unwrap();
     let event = Event::create(
+        "NewEvent",
         organization.id,
         venue.id,
         NaiveDate::from_ymd(2016, 7, 8).and_hms(9, 10, 11),
@@ -37,6 +38,7 @@ fn update() {
         .commit(&project)
         .unwrap();
     let mut event = Event::create(
+        "newEvent",
         organization.id,
         venue.id,
         NaiveDate::from_ymd(2016, 7, 8).and_hms(9, 10, 11),
@@ -62,6 +64,7 @@ fn find_individuals() {
         .commit(&project)
         .unwrap();
     let mut event = Event::create(
+        "NewEvent",
         organization.id,
         venue.id,
         NaiveDate::from_ymd(2016, 7, 8).and_hms(9, 10, 11),
@@ -98,6 +101,7 @@ fn find_list() {
         .commit(&project)
         .unwrap();
     let mut event = Event::create(
+        "NewEvent",
         organization.id,
         venue.id,
         NaiveDate::from_ymd(2016, 7, 8).and_hms(9, 10, 11),
@@ -109,6 +113,7 @@ fn find_list() {
 
     //find more than one event
     let mut event2 = Event::create(
+        "NewEvent",
         organization.id,
         venue.id,
         NaiveDate::from_ymd(2016, 7, 8).and_hms(9, 10, 11),

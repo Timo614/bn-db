@@ -15,6 +15,7 @@ use uuid::Uuid;
 #[table_name = "events"]
 pub struct Event {
     pub id: Uuid,
+    pub name: String,
     pub organization_id: Uuid,
     pub venue_id: Uuid,
     pub created_at: NaiveDateTime,
@@ -22,9 +23,10 @@ pub struct Event {
     pub event_start: NaiveDateTime,
 }
 
-#[derive(Insertable)]
+#[derive(Insertable, Serialize, Deserialize)]
 #[table_name = "events"]
 pub struct NewEvent {
+    pub name: String,
     pub organization_id: Uuid,
     pub venue_id: Uuid,
     pub event_start: NaiveDateTime,
@@ -43,8 +45,14 @@ impl NewEvent {
 }
 
 impl Event {
-    pub fn create(organization_id: Uuid, venue_id: Uuid, event_start: NaiveDateTime) -> NewEvent {
+    pub fn create(
+        name: &str,
+        organization_id: Uuid,
+        venue_id: Uuid,
+        event_start: NaiveDateTime,
+    ) -> NewEvent {
         NewEvent {
+            name: name.into(),
             organization_id: organization_id,
             venue_id: venue_id,
             event_start: event_start,

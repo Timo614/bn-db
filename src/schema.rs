@@ -27,6 +27,7 @@ table! {
 table! {
     events (id) {
         id -> Uuid,
+        name -> Text,
         organization_id -> Uuid,
         venue_id -> Uuid,
         created_at -> Timestamp,
