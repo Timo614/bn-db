@@ -129,7 +129,7 @@ fn has_valid_password_reset_token() {
         "Token should not be expired"
     );
 
-    // Token not yet expired
+    // Token does not exist
     user.password_reset_token = None;
     user.password_reset_requested_at = None;
     assert!(
