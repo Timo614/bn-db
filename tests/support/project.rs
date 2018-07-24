@@ -5,6 +5,8 @@ use diesel::sql_types::Bool;
 use diesel::{select, Connection, PgConnection, RunQueryDsl};
 use dotenv::dotenv;
 use std::env;
+use support::organization_builder::OrganizationBuilder;
+use support::user_builder::UserBuilder;
 
 pub struct TestProject {
     pub connection: DatabaseConnection,
@@ -46,6 +48,14 @@ impl TestProject {
             table
         ))).get_result(&self.admin)
             .unwrap()
+    }
+
+    pub fn create_user(&self) -> UserBuilder {
+        UserBuilder::new(&self)
+    }
+
+    pub fn create_organization(&self) -> OrganizationBuilder {
+        OrganizationBuilder::new(&self)
     }
 }
 

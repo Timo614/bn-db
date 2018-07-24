@@ -2,7 +2,7 @@ use db::Connectable;
 use diesel;
 use diesel::prelude::*;
 use models::{OrganizationUser, User};
-use schema::{organizations, users};
+use schema::{organization_users, organizations, users};
 use utils::errors::DatabaseError;
 use utils::errors::ErrorCode;
 use uuid::Uuid;
@@ -85,11 +85,37 @@ impl Organization {
                 .first::<Organization>(conn.get_connection()),
         )
     }
-    pub fn all(conn: &Connectable) -> Result<Vec<Organization>, DatabaseError> {
-        DatabaseError::wrap(
+    pub fn all(user_id: Uuid, conn: &Connectable) -> Result<Vec<Organization>, DatabaseError> {
+        let orgs = DatabaseError::wrap(
             ErrorCode::QueryError,
             "Unable to load all organizations",
-            organizations::table.load(conn.get_connection()),
-        )
+            organizations::table
+                .filter(organizations::owner_user_id.eq(user_id))
+                .load(conn.get_connection()),
+        );
+
+        let mut orgs = match orgs {
+            Ok(o) => o,
+            Err(e) => return Err(e),
+        };
+
+        let org_members = DatabaseError::wrap(
+            ErrorCode::QueryError,
+            "Unable to load all organizations",
+            organization_users::table
+                .filter(organization_users::user_id.eq(user_id))
+                .inner_join(organizations::table)
+                .select(organizations::all_columns)
+                .load::<Organization>(conn.get_connection()),
+        );
+
+        let mut org_members = match org_members {
+            Ok(o) => o,
+            Err(e) => return Err(e),
+        };
+
+        orgs.append(&mut org_members);
+        orgs.sort_by(|a, b| a.name.cmp(&b.name));
+        Ok(orgs)
     }
 }
