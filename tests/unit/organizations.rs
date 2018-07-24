@@ -67,7 +67,7 @@ fn find() {
     edited_organization2.zip = Some(<String>::from("0125"));
     edited_organization2.phone = Some(<String>::from("+27123456780"));
     let _updated_organization = Organization::update(&edited_organization2, &project).unwrap();
-    let all_found_organizations = Organization::all(&project).unwrap();
+    let all_found_organizations = Organization::all(user.id, &project).unwrap();
     let all_organizations = vec![edited_organization, edited_organization2];
     assert_eq!(all_organizations, all_found_organizations);
 }
@@ -127,4 +127,24 @@ fn users() {
     assert!(user_results2.len() == 2);
     assert_eq!(user3.id, user_results2[0].id);
     assert_eq!(user2.id, user_results2[1].id);
+}
+
+#[test]
+fn all() {
+    let project = TestProject::new();
+    let user = project.create_user().finish();
+    let user2 = project.create_user().finish();
+    let org1 = project.create_organization().with_owner(&user).finish();
+    let org2 = project
+        .create_organization()
+        .with_owner(&user2)
+        .with_user(&user)
+        .finish();
+    let org3 = project.create_organization().with_owner(&user2).finish();
+
+    let orgs = Organization::all(user.id, &project).unwrap();
+
+    assert_eq!(orgs.len(), 2);
+    assert_eq!(orgs[0].id, org1.id);
+    assert_eq!(orgs[1].id, org2.id);
 }
