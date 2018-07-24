@@ -18,7 +18,7 @@ pub struct NewUser {
     role: Vec<String>,
 }
 
-#[derive(Queryable, Serialize, Identifiable)]
+#[derive(Queryable, Identifiable)]
 pub struct User {
     pub id: Uuid,
     pub name: String,
@@ -29,9 +29,11 @@ pub struct User {
     pub last_used: Option<NaiveDateTime>,
     pub active: bool,
     pub role: Vec<String>,
+    pub password_reset_token: Option<Uuid>,
+    pub password_reset_requested_at: Option<NaiveDateTime>,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Serialize)]
 pub struct DisplayUser {
     pub id: Uuid,
     pub name: String,

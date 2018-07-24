@@ -1,4 +1,5 @@
-use bigneon_db::models::{Artist, NewArtist};
+use bigneon_db::models::artists::UserEditableAttributes;
+use bigneon_db::models::Artist;
 use support::project::TestProject;
 use uuid::Uuid;
 
@@ -61,7 +62,7 @@ fn update_attributes() {
     let name = "Old Name";
     let artist = Artist::create(&name).commit(&project).unwrap();
 
-    let artist_parameters = NewArtist {
+    let artist_parameters = UserEditableAttributes {
         name: "New Name".to_string(),
     };
     let updated_artist = artist

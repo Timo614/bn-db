@@ -82,7 +82,7 @@ fn add_role() {
         .commit(&project)
         .unwrap();
 
-    user.add_role(Roles::Admin, &project);
+    user.add_role(Roles::Admin, &project).unwrap();
 
     let user2 = User::find(&user.id, &project).unwrap();
     assert_eq!(user2.role, vec!["Guest", "Admin"]);

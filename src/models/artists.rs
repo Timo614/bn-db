@@ -18,6 +18,12 @@ pub struct NewArtist {
     pub name: String,
 }
 
+#[derive(AsChangeset, Deserialize)]
+#[table_name = "artists"]
+pub struct UserEditableAttributes {
+    pub name: String,
+}
+
 impl NewArtist {
     pub fn commit(&self, conn: &Connectable) -> Result<Artist, DatabaseError> {
         DatabaseError::wrap(
@@ -57,27 +63,23 @@ impl Artist {
 
     pub fn update_attributes(
         &self,
-        artist_parameters: &NewArtist,
+        attributes: &UserEditableAttributes,
         conn: &Connectable,
     ) -> Result<Artist, DatabaseError> {
-        use schema::artists::dsl::*;
-
         DatabaseError::wrap(
             ErrorCode::UpdateError,
             "Error updating artist",
-            diesel::update(artists.filter(id.eq(self.id)))
-                .set(name.eq(&artist_parameters.name))
+            diesel::update(self)
+                .set(attributes)
                 .get_result(conn.get_connection()),
         )
     }
 
     pub fn destroy(&self, conn: &Connectable) -> Result<usize, DatabaseError> {
-        use schema::artists::dsl::*;
-
         DatabaseError::wrap(
             ErrorCode::DeleteError,
             "Failed to destroy artist record",
-            diesel::delete(artists.filter(id.eq(self.id))).execute(conn.get_connection()),
+            diesel::delete(self).execute(conn.get_connection()),
         )
     }
 }
