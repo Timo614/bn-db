@@ -75,13 +75,10 @@ fn update_attributes() {
 }
 
 #[test]
-#[should_panic]
 fn destroy() {
     let project = TestProject::new();
     let name = "Old Name";
     let artist = Artist::create(&name).commit(&project).unwrap();
     assert!(artist.destroy(&project).unwrap() > 0);
-
-    // Force panic proving record no longer exists
-    Artist::find(&artist.id, &project).unwrap();
+    assert!(Artist::find(&artist.id, &project).is_err());
 }
