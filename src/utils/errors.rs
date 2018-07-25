@@ -35,9 +35,9 @@ pub fn get_error_message(code: ErrorCode) -> (i32, String) {
 
 #[derive(Debug)]
 pub struct DatabaseError {
-    code: i32,
-    message: String,
-    cause: Option<String>,
+    pub code: i32,
+    pub message: String,
+    pub cause: Option<String>,
 }
 
 impl fmt::Display for DatabaseError {
