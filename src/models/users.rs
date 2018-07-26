@@ -33,7 +33,7 @@ pub struct User {
     pub password_reset_requested_at: Option<NaiveDateTime>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct DisplayUser {
     pub id: Uuid,
     pub name: String,
