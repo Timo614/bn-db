@@ -1,12 +1,11 @@
-use bigneon_db::models::{Organization, OrganizationUser, User};
+use bigneon_db::models::{Organization, OrganizationUser};
 use support::project::TestProject;
+use uuid::Uuid;
 
 #[test]
 fn create() {
     let project = TestProject::new();
-    let user = User::create("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
-        .commit(&project)
-        .unwrap();
+    let user = project.create_user().finish();
     let organization = Organization::create(user.id, "Organization")
         .commit(&project)
         .unwrap();
@@ -18,13 +17,10 @@ fn create() {
 #[test]
 fn update() {
     let project = TestProject::new();
-    let user = User::create("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
-        .commit(&project)
-        .unwrap();
+    let user = project.create_user().finish();
     //Edit Organization
-    let mut edited_organization = Organization::create(user.id, "Organization")
-        .commit(&project)
-        .unwrap();
+    let mut edited_organization = project.create_organization().with_owner(&user).finish();
+
     edited_organization.address = Some(<String>::from("Test Address"));
     edited_organization.city = Some(<String>::from("Test Address"));
     edited_organization.state = Some(<String>::from("Test state"));
@@ -38,13 +34,10 @@ fn update() {
 #[test]
 fn find() {
     let project = TestProject::new();
-    let user = User::create("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
-        .commit(&project)
-        .unwrap();
+    let user = project.create_user().finish();
     //Edit Organization
-    let mut edited_organization = Organization::create(user.id, "OrganizationForFindTest")
-        .commit(&project)
-        .unwrap();
+    let mut edited_organization = project.create_organization().with_owner(&user).finish();
+
     edited_organization.address = Some(<String>::from("Test Address"));
     edited_organization.city = Some(<String>::from("Test Address"));
     edited_organization.state = Some(<String>::from("Test state"));
@@ -55,63 +48,40 @@ fn find() {
     let _updated_organization = Organization::update(&edited_organization, &project).unwrap();
     let found_organization = Organization::find(&edited_organization.id, &project).unwrap();
     assert_eq!(edited_organization, found_organization);
-
-    //find more than one organization
-    let mut edited_organization2 = Organization::create(user.id, "OrganizationForFindTest2")
-        .commit(&project)
-        .unwrap();
-    edited_organization2.address = Some(<String>::from("Test Address2"));
-    edited_organization2.city = Some(<String>::from("Test Address2"));
-    edited_organization2.state = Some(<String>::from("Test state2"));
-    edited_organization2.country = Some(<String>::from("Test country2"));
-    edited_organization2.zip = Some(<String>::from("0125"));
-    edited_organization2.phone = Some(<String>::from("+27123456780"));
-    let _updated_organization = Organization::update(&edited_organization2, &project).unwrap();
-    let all_found_organizations = Organization::all(user.id, &project).unwrap();
-    let all_organizations = vec![edited_organization, edited_organization2];
-    assert_eq!(all_organizations, all_found_organizations);
 }
 
 #[test]
 fn users() {
     let project = TestProject::new();
-    let user = User::create("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
-        .commit(&project)
-        .unwrap();
-    let user2 = User::create("David", "david@tari.com", "555-555-5555", "examplePassword")
-        .commit(&project)
-        .unwrap();
-    let user3 = User::create("Ann", "ann@tari.com", "555-555-5555", "examplePassword")
-        .commit(&project)
-        .unwrap();
-    let organization = Organization::create(user.id, "Organization")
-        .commit(&project)
-        .unwrap();
-    let organization2 = Organization::create(user3.id, "Organization")
-        .commit(&project)
-        .unwrap();
+    let user = project.create_user().finish();
+    let user2 = project.create_user().finish();
+    let user3 = project.create_user().finish();
+    let organization = project.create_organization().with_owner(&user).finish();
+    let organization2 = project.create_organization().with_owner(&user3).finish();
     OrganizationUser::create(organization2.id, user2.id)
         .commit(&project)
         .unwrap();
 
     // Owner is included in the user results for organization2 but not organization2
     let user_results = organization.users(&project);
-    assert!(user_results.len() == 1);
+    assert_eq!(user_results.len(), 1);
     assert_eq!(user.id, user_results[0].id);
-    let user_results2 = organization2.users(&project);
-    assert!(user_results2.len() == 2);
-    assert_eq!(user3.id, user_results2[0].id);
-    assert_eq!(user2.id, user_results2[1].id);
+
+    let user_results = organization2.users(&project);
+    assert_eq!(
+        vec![user3.id, user2.id],
+        user_results.iter().map(|u| u.id).collect::<Vec<Uuid>>()
+    );
 
     // Explicitly make the organization user an org user
     OrganizationUser::create(organization.id, user.id)
         .commit(&project)
         .unwrap();
     let user_results = organization.users(&project);
-    assert!(user_results.len() == 1);
+    assert_eq!(user_results.len(), 1);
     assert_eq!(user.id, user_results[0].id);
     let user_results2 = organization2.users(&project);
-    assert!(user_results2.len() == 2);
+    assert_eq!(user_results2.len(), 2);
     assert_eq!(user3.id, user_results2[0].id);
     assert_eq!(user2.id, user_results2[1].id);
 
@@ -140,7 +110,7 @@ fn all() {
         .with_owner(&user2)
         .with_user(&user)
         .finish();
-    let org3 = project.create_organization().with_owner(&user2).finish();
+    let _org3 = project.create_organization().with_owner(&user2).finish();
 
     let orgs = Organization::all(user.id, &project).unwrap();
 

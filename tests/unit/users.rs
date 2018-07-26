@@ -25,9 +25,7 @@ fn commit() {
 #[test]
 fn find() {
     let project = TestProject::new();
-    let user = User::create("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
-        .commit(&project)
-        .unwrap();
+    let user = project.create_user().finish();
 
     let found_user = User::find(&user.id, &project).expect("User was not found");
     assert_eq!(found_user.id, user.id);
@@ -66,9 +64,7 @@ fn find_by_email() {
 #[test]
 fn for_display() {
     let project = TestProject::new();
-    let user = User::create("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
-        .commit(&project)
-        .unwrap();
+    let user = project.create_user().finish();
     let user_id = user.id.clone();
     let display_user = user.for_display();
 
@@ -78,9 +74,7 @@ fn for_display() {
 #[test]
 fn add_role() {
     let project = TestProject::new();
-    let user = User::create("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
-        .commit(&project)
-        .unwrap();
+    let user = project.create_user().finish();
 
     user.add_role(Roles::Admin, &project).unwrap();
 

@@ -1,18 +1,12 @@
-use bigneon_db::models::{Organization, OrganizationUser, User};
+use bigneon_db::models::OrganizationUser;
 use support::project::TestProject;
 
 #[test]
 fn create() {
     let project = TestProject::new();
-    let user = User::create("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
-        .commit(&project)
-        .unwrap();
-    let user2 = User::create("Dan", "dan@tari.com", "555-555-5555", "examplePassword")
-        .commit(&project)
-        .unwrap();
-    let organization = Organization::create(user.id, "Organization")
-        .commit(&project)
-        .unwrap();
+    let user = project.create_user().finish();
+    let user2 = project.create_user().finish();
+    let organization = project.create_organization().with_owner(&user).finish();
     let organization_user = OrganizationUser::create(organization.id, user2.id)
         .commit(&project)
         .unwrap();

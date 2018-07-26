@@ -103,7 +103,9 @@ impl Event {
         DatabaseError::wrap(
             ErrorCode::QueryError,
             "Unable to load all events",
-            events::table.load(conn.get_connection()),
+            events::table
+                .order_by(events::event_start.desc())
+                .load(conn.get_connection()),
         )
     }
 }

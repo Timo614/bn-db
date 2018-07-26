@@ -1,4 +1,4 @@
-use bigneon_db::models::{Organization, User, Venue};
+use bigneon_db::models::{Organization, Venue};
 use support::project::TestProject;
 
 #[test]
@@ -76,13 +76,9 @@ fn create_find_via_org() {
     edited_venue2.phone = Some(<String>::from("+27123456789"));
     let updated_venue2 = Venue::update(&edited_venue2, &project).unwrap();
     //create user
-    let user = User::create("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
-        .commit(&project)
-        .unwrap();
+    let user = project.create_user().finish();
     //create organization
-    let mut edited_organization = Organization::create(user.id, "OrganizationforVenue")
-        .commit(&project)
-        .unwrap();
+    let mut edited_organization = project.create_organization().with_owner(&user).finish();
     edited_organization.address = Some(<String>::from("Test Address"));
     edited_organization.city = Some(<String>::from("Test Address"));
     edited_organization.state = Some(<String>::from("Test state"));

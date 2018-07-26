@@ -1,16 +1,12 @@
-use bigneon_db::models::{Organization, OrganizationVenue, User, Venue};
+use bigneon_db::models::{Organization, OrganizationVenue, Venue};
 use support::project::TestProject;
 
 #[test]
 fn create() {
     let project = TestProject::new();
-    let user = User::create("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
-        .commit(&project)
-        .unwrap();
+    let user = project.create_user().finish();
     let venue = Venue::create("Name").commit(&project).unwrap();
-    let organization = Organization::create(user.id, "Organization")
-        .commit(&project)
-        .unwrap();
+    let organization = project.create_organization().with_owner(&user).finish();
     let organization_venue = OrganizationVenue::create(organization.id, venue.id)
         .commit(&project)
         .unwrap();
@@ -24,12 +20,8 @@ fn create() {
 fn find() {
     //create user and organization
     let project = TestProject::new();
-    let user = User::create("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
-        .commit(&project)
-        .unwrap();
-    let mut edited_organization = Organization::create(user.id, "OrganizationForFindTest2")
-        .commit(&project)
-        .unwrap();
+    let user = project.create_user().finish();
+    let mut edited_organization = project.create_organization().with_owner(&user).finish();
     edited_organization.address = Some(<String>::from("Test Address2"));
     edited_organization.city = Some(<String>::from("Test Address2"));
     edited_organization.state = Some(<String>::from("Test state2"));
@@ -66,12 +58,8 @@ fn find() {
 fn find_lists() {
     //create user and organization
     let project = TestProject::new();
-    let user = User::create("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
-        .commit(&project)
-        .unwrap();
-    let mut edited_organization = Organization::create(user.id, "OrganizationForFindTest2")
-        .commit(&project)
-        .unwrap();
+    let user = project.create_user().finish();
+    let mut edited_organization = project.create_organization().with_owner(&user).finish();
     edited_organization.address = Some(<String>::from("Test Address2"));
     edited_organization.city = Some(<String>::from("Test Address2"));
     edited_organization.state = Some(<String>::from("Test state2"));
@@ -79,9 +67,7 @@ fn find_lists() {
     edited_organization.zip = Some(<String>::from("0125"));
     edited_organization.phone = Some(<String>::from("+27123456780"));
     let updated_organization = Organization::update(&edited_organization, &project).unwrap();
-    let mut edited_organization2 = Organization::create(user.id, "OrganizationForFindTest2")
-        .commit(&project)
-        .unwrap();
+    let mut edited_organization2 = project.create_organization().with_owner(&user).finish();
     edited_organization2.address = Some(<String>::from("Test Address2"));
     edited_organization2.city = Some(<String>::from("Test Address2"));
     edited_organization2.state = Some(<String>::from("Test state2"));

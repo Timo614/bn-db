@@ -1,5 +1,5 @@
 extern crate chrono;
-use bigneon_db::models::{Event, Organization, User, Venue};
+use bigneon_db::models::{Event, Venue};
 use support::project::TestProject;
 use unit::events::chrono::prelude::*;
 
@@ -7,12 +7,8 @@ use unit::events::chrono::prelude::*;
 fn create() {
     let project = TestProject::new();
     let venue = Venue::create("Venue").commit(&project).unwrap();
-    let user = User::create("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
-        .commit(&project)
-        .unwrap();
-    let organization = Organization::create(user.id, "Organization")
-        .commit(&project)
-        .unwrap();
+    let user = project.create_user().finish();
+    let organization = project.create_organization().with_owner(&user).finish();
     let event = Event::create(
         "NewEvent",
         organization.id,
@@ -26,17 +22,12 @@ fn create() {
 }
 #[test]
 fn update() {
-    let _project = TestProject::new();
     //create event
     let project = TestProject::new();
     let venue = Venue::create("Venue").commit(&project).unwrap();
 
-    let user = User::create("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
-        .commit(&project)
-        .unwrap();
-    let organization = Organization::create(user.id, "Organization")
-        .commit(&project)
-        .unwrap();
+    let user = project.create_user().finish();
+    let organization = project.create_organization().with_owner(&user).finish();
     let mut event = Event::create(
         "newEvent",
         organization.id,
@@ -52,17 +43,12 @@ fn update() {
 
 #[test]
 fn find_individuals() {
-    let _project = TestProject::new();
     //create event
     let project = TestProject::new();
     let venue = Venue::create("Venue").commit(&project).unwrap();
 
-    let user = User::create("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
-        .commit(&project)
-        .unwrap();
-    let organization = Organization::create(user.id, "Organization")
-        .commit(&project)
-        .unwrap();
+    let user = project.create_user().finish();
+    let organization = project.create_organization().with_owner(&user).finish();
     let mut event = Event::create(
         "NewEvent",
         organization.id,
@@ -90,16 +76,11 @@ fn find_individuals() {
 
 #[test]
 fn find_list() {
-    let _project = TestProject::new();
     //create event
     let project = TestProject::new();
     let venue = Venue::create("VenueL").commit(&project).unwrap();
-    let user = User::create("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
-        .commit(&project)
-        .unwrap();
-    let organization = Organization::create(user.id, "OrganizationL")
-        .commit(&project)
-        .unwrap();
+    let user = project.create_user().finish();
+    let organization = project.create_organization().with_owner(&user).finish();
     let mut event = Event::create(
         "NewEvent",
         organization.id,
