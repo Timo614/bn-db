@@ -118,4 +118,15 @@ impl Organization {
         orgs.sort_by(|a, b| a.name.cmp(&b.name));
         Ok(orgs)
     }
+    pub fn remove_user(&self, user_id: &Uuid, conn: &Connectable) -> Result<usize, DatabaseError> {
+        DatabaseError::wrap(
+            ErrorCode::QueryError,
+            "Error loading organization",
+            diesel::delete(
+                organization_users::table
+                    .filter(organization_users::user_id.eq(user_id))
+                    .filter(organization_users::organization_id.eq(self.id)),
+            ).execute(conn.get_connection()),
+        )
+    }
 }

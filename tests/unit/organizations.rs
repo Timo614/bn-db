@@ -113,8 +113,33 @@ fn all() {
     let _org3 = project.create_organization().with_owner(&user2).finish();
 
     let orgs = Organization::all(user.id, &project).unwrap();
+    let test_vec = vec![org1, org2];
+    assert_eq!(orgs, test_vec);
+}
 
-    assert_eq!(orgs.len(), 2);
-    assert_eq!(orgs[0].id, org1.id);
-    assert_eq!(orgs[1].id, org2.id);
+#[test]
+fn remove_users() {
+    let project = TestProject::new();
+    let user = project.create_user().finish();
+    let user2 = project.create_user().finish();
+    let user3 = project.create_user().finish();
+    let organization = project.create_organization().with_owner(&user).finish();
+    OrganizationUser::create(organization.id, user2.id)
+        .commit(&project)
+        .unwrap();
+    OrganizationUser::create(organization.id, user3.id)
+        .commit(&project)
+        .unwrap();
+    let user2_id = user2.id;
+
+    let user_results = organization.users(&project);
+    let users_predelete = vec![user.clone(), user2, user3.clone()];
+    assert_eq!(user_results, users_predelete);
+
+    //remove user
+    let result = organization.remove_user(&user2_id, &project).unwrap();
+    assert_eq!(result, 1);
+    let user_results2 = organization.users(&project);
+    let users_postdelete = vec![user, user3];
+    assert_eq!(user_results2, users_postdelete);
 }

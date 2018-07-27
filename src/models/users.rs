@@ -8,7 +8,7 @@ use utils::errors::{DatabaseError, ErrorCode};
 use utils::passwords::PasswordHash;
 use uuid::Uuid;
 
-#[derive(Insertable)]
+#[derive(Insertable, PartialEq, Debug)]
 #[table_name = "users"]
 pub struct NewUser {
     pub name: String,
@@ -18,7 +18,7 @@ pub struct NewUser {
     role: Vec<String>,
 }
 
-#[derive(Queryable, Identifiable)]
+#[derive(Queryable, Identifiable, PartialEq, Debug, Clone)]
 pub struct User {
     pub id: Uuid,
     pub name: String,
