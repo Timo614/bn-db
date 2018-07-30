@@ -1,4 +1,4 @@
-use bigneon_db::models::{Organization, OrganizationUser};
+use bigneon_db::models::{Organization, OrganizationEditableAttributes, OrganizationUser};
 use support::project::TestProject;
 use uuid::Uuid;
 
@@ -21,14 +21,40 @@ fn update() {
     //Edit Organization
     let mut edited_organization = project.create_organization().with_owner(&user).finish();
 
-    edited_organization.address = Some(<String>::from("Test Address"));
-    edited_organization.city = Some(<String>::from("Test Address"));
-    edited_organization.state = Some(<String>::from("Test state"));
-    edited_organization.country = Some(<String>::from("Test country"));
-    edited_organization.zip = Some(<String>::from("0124"));
-    edited_organization.phone = Some(<String>::from("+27123456789"));
-    let updated_organization = Organization::update(&edited_organization, &project).unwrap();
+    edited_organization.name = "Test Org".to_string();
+    edited_organization.address = Some("Test Address".to_string());
+    edited_organization.city = Some("Test Address".to_string());
+    edited_organization.state = Some("Test state".to_string());
+    edited_organization.country = Some("Test country".to_string());
+    edited_organization.zip = Some("0124".to_string());
+    edited_organization.phone = Some("+27123456789".to_string());
+
+    let mut changed_attrs = OrganizationEditableAttributes::new();
+    changed_attrs.name = Some("Test Org".to_string());
+    changed_attrs.address = Some("Test Address".to_string());
+    changed_attrs.city = Some("Test Address".to_string());
+    changed_attrs.state = Some("Test state".to_string());
+    changed_attrs.country = Some("Test country".to_string());
+    changed_attrs.zip = Some("0124".to_string());
+    changed_attrs.phone = Some("+27123456789".to_string());
+    let updated_organization =
+        Organization::update(&edited_organization, changed_attrs, &project).unwrap();
     assert_eq!(edited_organization, updated_organization);
+}
+
+#[test]
+fn update_owner() {
+    let project = TestProject::new();
+    let user = project.create_user().finish();
+    //Edit Organization
+    let organization = project.create_organization().with_owner(&user).finish();
+
+    let user2 = project.create_user().finish();
+
+    let updated_org = organization.set_owner(user2.id, &project).unwrap();
+    let db_org = Organization::find(&organization.id, &project).unwrap();
+    assert_eq!(updated_org.owner_user_id, user2.id);
+    assert_eq!(db_org.owner_user_id, user2.id);
 }
 
 #[test]
@@ -36,18 +62,13 @@ fn find() {
     let project = TestProject::new();
     let user = project.create_user().finish();
     //Edit Organization
-    let mut edited_organization = project.create_organization().with_owner(&user).finish();
-
-    edited_organization.address = Some(<String>::from("Test Address"));
-    edited_organization.city = Some(<String>::from("Test Address"));
-    edited_organization.state = Some(<String>::from("Test state"));
-    edited_organization.country = Some(<String>::from("Test country"));
-    edited_organization.zip = Some(<String>::from("0124"));
-    edited_organization.phone = Some(<String>::from("+27123456789"));
-    //find organization
-    let _updated_organization = Organization::update(&edited_organization, &project).unwrap();
-    let found_organization = Organization::find(&edited_organization.id, &project).unwrap();
-    assert_eq!(edited_organization, found_organization);
+    let organization = project
+        .create_organization()
+        .with_owner(&user)
+        .with_address()
+        .finish();
+    let found_organization = Organization::find(&organization.id, &project).unwrap();
+    assert_eq!(organization, found_organization);
 }
 
 #[test]

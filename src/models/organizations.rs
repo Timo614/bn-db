@@ -42,6 +42,32 @@ impl NewOrganization {
     }
 }
 
+#[derive(AsChangeset, Deserialize)]
+#[table_name = "organizations"]
+pub struct OrganizationEditableAttributes {
+    pub name: Option<String>,
+    pub address: Option<String>,
+    pub city: Option<String>,
+    pub state: Option<String>,
+    pub country: Option<String>,
+    pub zip: Option<String>,
+    pub phone: Option<String>,
+}
+
+impl OrganizationEditableAttributes {
+    pub fn new() -> OrganizationEditableAttributes {
+        OrganizationEditableAttributes {
+            name: None,
+            address: None,
+            city: None,
+            state: None,
+            country: None,
+            zip: None,
+            phone: None,
+        }
+    }
+}
+
 impl Organization {
     pub fn create(owner_user_id: Uuid, name: &str) -> NewOrganization {
         NewOrganization {
@@ -50,12 +76,30 @@ impl Organization {
         }
     }
 
-    pub fn update(&self, conn: &Connectable) -> Result<Organization, DatabaseError> {
+    pub fn update(
+        &self,
+        attributes: OrganizationEditableAttributes,
+        conn: &Connectable,
+    ) -> Result<Organization, DatabaseError> {
         DatabaseError::wrap(
             ErrorCode::UpdateError,
             "Could not update organization",
             diesel::update(self)
-                .set(self)
+                .set(attributes)
+                .get_result(conn.get_connection()),
+        )
+    }
+
+    pub fn set_owner(
+        &self,
+        owner_user_id: Uuid,
+        conn: &Connectable,
+    ) -> Result<Organization, DatabaseError> {
+        DatabaseError::wrap(
+            ErrorCode::UpdateError,
+            "Could not update organization owner",
+            diesel::update(self)
+                .set(organizations::owner_user_id.eq(owner_user_id))
                 .get_result(conn.get_connection()),
         )
     }

@@ -65,9 +65,7 @@ fn update_attributes() {
     let artist_parameters = UserEditableAttributes {
         name: "New Name".to_string(),
     };
-    let updated_artist = artist
-        .update_attributes(&artist_parameters, &project)
-        .unwrap();
+    let updated_artist = artist.update(&artist_parameters, &project).unwrap();
 
     assert_eq!(updated_artist.id, artist.id);
     assert_ne!(updated_artist.name, artist.name);

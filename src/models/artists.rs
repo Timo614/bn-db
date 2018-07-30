@@ -61,7 +61,7 @@ impl Artist {
         )
     }
 
-    pub fn update_attributes(
+    pub fn update(
         &self,
         attributes: &UserEditableAttributes,
         conn: &Connectable,

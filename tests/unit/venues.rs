@@ -1,4 +1,4 @@
-use bigneon_db::models::{Organization, Venue};
+use bigneon_db::models::Venue;
 use support::project::TestProject;
 
 #[test]
@@ -78,19 +78,12 @@ fn create_find_via_org() {
     //create user
     let user = project.create_user().finish();
     //create organization
-    let mut edited_organization = project.create_organization().with_owner(&user).finish();
-    edited_organization.address = Some(<String>::from("Test Address"));
-    edited_organization.city = Some(<String>::from("Test Address"));
-    edited_organization.state = Some(<String>::from("Test state"));
-    edited_organization.country = Some(<String>::from("Test country"));
-    edited_organization.zip = Some(<String>::from("0124"));
-    edited_organization.phone = Some(<String>::from("+27123456789"));
-    let updated_organization = Organization::update(&edited_organization, &project).unwrap();
+    let organization = project.create_organization().with_owner(&user).finish();
+
     //Do linking
-    let _org_venue_link = updated_venue.add_to_organization(&updated_organization.id, &project);
-    let _org_venue_link = updated_venue2.add_to_organization(&updated_organization.id, &project);
+    let _org_venue_link = updated_venue.add_to_organization(&organization.id, &project);
+    let _org_venue_link = updated_venue2.add_to_organization(&organization.id, &project);
     let all_venues = vec![updated_venue, updated_venue2];
-    let found_venues =
-        Venue::find_all_for_organization(&updated_organization.id, &project).unwrap();
+    let found_venues = Venue::find_all_for_organization(&organization.id, &project).unwrap();
     assert_eq!(found_venues, all_venues);
 }
