@@ -25,6 +25,7 @@ pub struct User {
     pub email: String,
     pub phone: String,
     pub hashed_pw: String,
+    pub password_modified_at: NaiveDateTime,
     pub created_at: NaiveDateTime,
     pub last_used: Option<NaiveDateTime>,
     pub active: bool,
