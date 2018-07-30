@@ -49,8 +49,7 @@ fn find_by_email() {
         .unwrap();
 
     let found_user = User::find_by_email(&email, &project).expect("User was not found");
-    assert_eq!(found_user.id, user.id);
-    assert_eq!(found_user.email, user.email);
+    assert_eq!(found_user, user);
 
     assert!(
         match User::find_by_email("not@real.com", &project) {
