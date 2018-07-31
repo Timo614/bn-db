@@ -45,6 +45,20 @@ table! {
 }
 
 table! {
+    organization_invites (id) {
+        id -> Uuid,
+        organization_id -> Uuid,
+        invitee_id -> Uuid,
+        created_on -> Timestamp,
+        security_token -> Nullable<Uuid>,
+        user_id -> Nullable<Uuid>,
+        status_changed_on -> Nullable<Timestamp>,
+        accepted -> Nullable<Int2>,
+        user_email -> Nullable<Text>,
+    }
+}
+
+table! {
     organizations (id) {
         id -> Uuid,
         owner_user_id -> Uuid,
@@ -112,6 +126,7 @@ joinable!(events -> organizations (organization_id));
 joinable!(events -> venues (venue_id));
 joinable!(orders -> events (event_id));
 joinable!(orders -> users (user_id));
+joinable!(organization_invites -> organizations (organization_id));
 joinable!(organization_users -> organizations (organization_id));
 joinable!(organization_users -> users (user_id));
 joinable!(organization_venues -> organizations (organization_id));
@@ -124,6 +139,7 @@ allow_tables_to_appear_in_same_query!(
     event_histories,
     events,
     orders,
+    organization_invites,
     organizations,
     organization_users,
     organization_venues,
