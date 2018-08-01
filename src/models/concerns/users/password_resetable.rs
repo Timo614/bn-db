@@ -45,6 +45,7 @@ impl PasswordResetable for User {
             Ok(user) => {
                 if user.has_valid_password_reset_token() {
                     let hash = PasswordHash::generate(password, None);
+                    let now = Utc::now().naive_utc();
 
                     DatabaseError::wrap(
                         ErrorCode::UpdateError,
@@ -52,6 +53,7 @@ impl PasswordResetable for User {
                         diesel::update(users.filter(id.eq(user.id)))
                             .set((
                                 hashed_pw.eq(&hash.to_string()),
+                                password_modified_at.eq(now),
                                 PasswordReset {
                                     password_reset_token: None,
                                     password_reset_requested_at: None,

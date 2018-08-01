@@ -5,6 +5,7 @@ CREATE TABLE users (
   email TEXT NOT NULL UNIQUE,
   phone TEXT NOT NULL,
   hashed_pw TEXT NOT NULL,
+  password_modified_at TIMESTAMP NOT NULL DEFAULT now(),
   created_at TIMESTAMP NOT NULL DEFAULT now(),
   last_used TIMESTAMP DEFAULT NULL,
   active BOOLEAN NOT NULL DEFAULT 't',

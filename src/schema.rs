@@ -59,20 +59,6 @@ table! {
 }
 
 table! {
-    organizations (id) {
-        id -> Uuid,
-        owner_user_id -> Uuid,
-        name -> Text,
-        address -> Nullable<Text>,
-        city -> Nullable<Text>,
-        state -> Nullable<Text>,
-        country -> Nullable<Text>,
-        zip -> Nullable<Text>,
-        phone -> Nullable<Text>,
-    }
-}
-
-table! {
     organization_users (id) {
         id -> Uuid,
         organization_id -> Uuid,
@@ -89,12 +75,27 @@ table! {
 }
 
 table! {
+    organizations (id) {
+        id -> Uuid,
+        owner_user_id -> Uuid,
+        name -> Text,
+        address -> Nullable<Text>,
+        city -> Nullable<Text>,
+        state -> Nullable<Text>,
+        country -> Nullable<Text>,
+        zip -> Nullable<Text>,
+        phone -> Nullable<Text>,
+    }
+}
+
+table! {
     users (id) {
         id -> Uuid,
         name -> Text,
         email -> Text,
         phone -> Text,
         hashed_pw -> Text,
+        password_modified_at -> Timestamp,
         created_at -> Timestamp,
         last_used -> Nullable<Timestamp>,
         active -> Bool,
@@ -140,9 +141,9 @@ allow_tables_to_appear_in_same_query!(
     events,
     orders,
     organization_invites,
-    organizations,
     organization_users,
     organization_venues,
+    organizations,
     users,
     venues,
 );

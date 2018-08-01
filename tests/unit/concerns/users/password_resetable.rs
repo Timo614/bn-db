@@ -41,6 +41,7 @@ fn consume_password_reset_token() {
     let user = User::create("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
         .commit(&project)
         .unwrap();
+    let pw_modified_at = user.password_modified_at;
     let user: User = user.create_password_reset_token(&project)
         .expect("Failed to create reset token")
         .into();
@@ -56,6 +57,7 @@ fn consume_password_reset_token() {
     assert!(user.check_password(&password));
     assert!(user.password_reset_token.is_none());
     assert!(user.password_reset_requested_at.is_none());
+    assert_ne!(user.password_modified_at, pw_modified_at);
 
     // Does not consume password reset as token was expired although valid
     let user: User = diesel::update(users.filter(id.eq(user.id)))
@@ -65,6 +67,7 @@ fn consume_password_reset_token() {
         })
         .get_result(project.get_connection())
         .unwrap();
+    let pw_modified_at = user.password_modified_at;
     let password = "newPassword2";
     match User::consume_password_reset_token(
         &user.password_reset_token.unwrap(),
@@ -88,6 +91,7 @@ fn consume_password_reset_token() {
         ),
     }
     assert!(!user.check_password(&password));
+    assert_eq!(user.password_modified_at, pw_modified_at);
 }
 
 #[test]
