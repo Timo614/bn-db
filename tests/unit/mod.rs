@@ -4,6 +4,7 @@ pub mod event_artists;
 pub mod event_histories;
 pub mod events;
 pub mod orders;
+pub mod organization_invites;
 pub mod organization_users;
 pub mod organization_venues;
 pub mod organizations;

@@ -49,12 +49,26 @@ table! {
         id -> Uuid,
         organization_id -> Uuid,
         invitee_id -> Uuid,
-        created_on -> Timestamp,
+        user_email -> Text,
+        create_at -> Timestamp,
         security_token -> Nullable<Uuid>,
         user_id -> Nullable<Uuid>,
-        status_changed_on -> Nullable<Timestamp>,
+        status_change_at -> Nullable<Timestamp>,
         accepted -> Nullable<Int2>,
-        user_email -> Nullable<Text>,
+    }
+}
+
+table! {
+    organizations (id) {
+        id -> Uuid,
+        owner_user_id -> Uuid,
+        name -> Text,
+        address -> Nullable<Text>,
+        city -> Nullable<Text>,
+        state -> Nullable<Text>,
+        country -> Nullable<Text>,
+        zip -> Nullable<Text>,
+        phone -> Nullable<Text>,
     }
 }
 
@@ -71,20 +85,6 @@ table! {
         id -> Uuid,
         organization_id -> Uuid,
         venue_id -> Uuid,
-    }
-}
-
-table! {
-    organizations (id) {
-        id -> Uuid,
-        owner_user_id -> Uuid,
-        name -> Text,
-        address -> Nullable<Text>,
-        city -> Nullable<Text>,
-        state -> Nullable<Text>,
-        country -> Nullable<Text>,
-        zip -> Nullable<Text>,
-        phone -> Nullable<Text>,
     }
 }
 
@@ -141,9 +141,9 @@ allow_tables_to_appear_in_same_query!(
     events,
     orders,
     organization_invites,
+    organizations,
     organization_users,
     organization_venues,
-    organizations,
     users,
     venues,
 );

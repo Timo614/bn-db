@@ -13,6 +13,7 @@ pub enum ErrorCode {
     DeleteError,
     ConnectionError,
     InternalError,
+    AccessError,
     Unknown,
 }
 
@@ -28,12 +29,13 @@ pub fn get_error_message(code: ErrorCode) -> (i32, String) {
         DeleteError => (3300, "Could not delete record"),
         ConnectionError => (4000, "Connection Error"),
         InternalError => (5000, "Internal error"),
+        AccessError => (6000, "Access error"),
         Unknown => (10, "Unknown database error"),
     };
     (code, msg.to_string())
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct DatabaseError {
     pub code: i32,
     pub message: String,

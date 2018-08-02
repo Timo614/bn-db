@@ -6,6 +6,7 @@ use diesel::{select, Connection, PgConnection, RunQueryDsl};
 use dotenv::dotenv;
 use std::env;
 use support::organization_builder::OrganizationBuilder;
+use support::organization_invite_builder::OrgInviteBuilder;
 use support::user_builder::UserBuilder;
 
 pub struct TestProject {
@@ -56,6 +57,10 @@ impl TestProject {
 
     pub fn create_organization(&self) -> OrganizationBuilder {
         OrganizationBuilder::new(&self)
+    }
+
+    pub fn create_organization_invite(&self) -> OrgInviteBuilder {
+        OrgInviteBuilder::new(&self)
     }
 }
 
