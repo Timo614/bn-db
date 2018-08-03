@@ -7,7 +7,7 @@ use utils::errors::DatabaseError;
 use utils::errors::ErrorCode;
 use uuid::Uuid;
 
-#[derive(Identifiable, Associations, Queryable, AsChangeset)]
+#[derive(Identifiable, Associations, Queryable)]
 #[belongs_to(User, foreign_key = "owner_user_id")]
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 #[table_name = "organizations"]

@@ -1,9 +1,7 @@
 use chrono::{Duration, NaiveDateTime, Utc};
 use db::Connectable;
 use diesel;
-use diesel::expression::dsl::sql;
 use diesel::prelude::*;
-use diesel::types::Date;
 use schema::organization_invites;
 use utils::errors::{DatabaseError, ErrorCode};
 use uuid::Uuid;

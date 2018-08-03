@@ -2,8 +2,8 @@
 CREATE TABLE users (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
   name TEXT NOT NULL,
-  email TEXT NOT NULL UNIQUE,
-  phone TEXT NOT NULL,
+  email TEXT NULL UNIQUE,
+  phone TEXT NULL,
   hashed_pw TEXT NOT NULL,
   password_modified_at TIMESTAMP NOT NULL DEFAULT now(),
   created_at TIMESTAMP NOT NULL DEFAULT now(),

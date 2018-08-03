@@ -2,6 +2,7 @@ use chrono::NaiveDateTime;
 use db::Connectable;
 use diesel;
 use diesel::prelude::*;
+use models::ExternalLogin;
 use models::Roles;
 use schema::users;
 use utils::errors::{DatabaseError, ErrorCode};
@@ -12,8 +13,8 @@ use uuid::Uuid;
 #[table_name = "users"]
 pub struct NewUser {
     pub name: String,
-    pub email: String,
-    pub phone: String,
+    pub email: Option<String>,
+    pub phone: Option<String>,
     pub hashed_pw: String,
     role: Vec<String>,
 }
@@ -22,8 +23,8 @@ pub struct NewUser {
 pub struct User {
     pub id: Uuid,
     pub name: String,
-    pub email: String,
-    pub phone: String,
+    pub email: Option<String>,
+    pub phone: Option<String>,
     pub hashed_pw: String,
     pub password_modified_at: NaiveDateTime,
     pub created_at: NaiveDateTime,
@@ -38,8 +39,8 @@ pub struct User {
 pub struct DisplayUser {
     pub id: Uuid,
     pub name: String,
-    pub email: String,
-    pub phone: String,
+    pub email: Option<String>,
+    pub phone: Option<String>,
     pub created_at: NaiveDateTime,
 }
 
@@ -57,8 +58,8 @@ impl User {
         let hash = PasswordHash::generate(password, None);
         NewUser {
             name: String::from(name),
-            email: String::from(email),
-            phone: String::from(phone),
+            email: Some(String::from(email)),
+            phone: Some(String::from(phone)),
             hashed_pw: hash.to_string(),
             role: vec![Roles::Guest.to_string()],
         }
@@ -72,13 +73,14 @@ impl User {
         )
     }
 
-    pub fn find_by_email(email: &str, conn: &Connectable) -> Result<User, DatabaseError> {
+    pub fn find_by_email(email: &str, conn: &Connectable) -> Result<Option<User>, DatabaseError> {
         DatabaseError::wrap(
             ErrorCode::QueryError,
             "Error loading user",
             users::table
                 .filter(users::email.eq(email))
-                .first::<User>(conn.get_connection()),
+                .first::<User>(conn.get_connection())
+                .optional(),
         )
     }
 
@@ -104,6 +106,36 @@ impl User {
 
     pub fn for_display(self) -> DisplayUser {
         self.into()
+    }
+
+    pub fn add_external_login(
+        &self,
+        external_user_id: String,
+        site: String,
+        access_token: String,
+        conn: &Connectable,
+    ) -> Result<ExternalLogin, DatabaseError> {
+        ExternalLogin::create(external_user_id, site, self.id, access_token).commit(&*conn)
+    }
+
+    pub fn create_from_external_login(
+        external_user_id: String,
+        site: String,
+        access_token: String,
+        conn: &Connectable,
+    ) -> Result<User, DatabaseError> {
+        let hash = PasswordHash::generate("random", None);
+        let new_user = NewUser {
+            name: String::from("Unknown"),
+            email: None,
+            phone: None,
+            hashed_pw: hash.to_string(),
+            role: vec![Roles::Guest.to_string()],
+        };
+        new_user.commit(&*conn).and_then(|user| {
+            user.add_external_login(external_user_id, site, access_token, conn)?;
+            Ok(user)
+        })
     }
 }
 

@@ -37,6 +37,17 @@ table! {
 }
 
 table! {
+    external_logins (id) {
+        id -> Uuid,
+        user_id -> Uuid,
+        created_at -> Timestamp,
+        site -> Text,
+        access_token -> Text,
+        external_user_id -> Text,
+    }
+}
+
+table! {
     orders (id) {
         id -> Uuid,
         user_id -> Uuid,
@@ -92,8 +103,8 @@ table! {
     users (id) {
         id -> Uuid,
         name -> Text,
-        email -> Text,
-        phone -> Text,
+        email -> Nullable<Text>,
+        phone -> Nullable<Text>,
         hashed_pw -> Text,
         password_modified_at -> Timestamp,
         created_at -> Timestamp,
@@ -125,6 +136,7 @@ joinable!(event_histories -> orders (order_id));
 joinable!(event_histories -> users (user_id));
 joinable!(events -> organizations (organization_id));
 joinable!(events -> venues (venue_id));
+joinable!(external_logins -> users (user_id));
 joinable!(orders -> events (event_id));
 joinable!(orders -> users (user_id));
 joinable!(organization_invites -> organizations (organization_id));
@@ -139,6 +151,7 @@ allow_tables_to_appear_in_same_query!(
     event_artists,
     event_histories,
     events,
+    external_logins,
     orders,
     organization_invites,
     organizations,

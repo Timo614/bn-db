@@ -15,8 +15,8 @@ fn commit() {
         .unwrap();
 
     assert_eq!(user.name, name);
-    assert_eq!(user.email, email);
-    assert_eq!(user.phone, phone_number);
+    assert_eq!(user.email, Some(email.to_string()));
+    assert_eq!(user.phone, Some(phone_number.to_string()));
     assert_ne!(user.hashed_pw, password);
     assert_eq!(user.hashed_pw.is_empty(), false);
     assert_eq!(user.id.to_string().is_empty(), false);
@@ -49,13 +49,12 @@ fn find_by_email() {
         .unwrap();
 
     let found_user = User::find_by_email(&email, &project).expect("User was not found");
-    assert_eq!(found_user, user);
+    assert_eq!(found_user.unwrap(), user);
 
     assert!(
-        match User::find_by_email("not@real.com", &project) {
-            Ok(_user) => false,
-            Err(_e) => true,
-        },
+        User::find_by_email("not@real.com", &project)
+            .unwrap()
+            .is_none(),
         "User incorrectly returned when email invalid"
     );
 }
