@@ -25,5 +25,5 @@ before_script:
   - ./scripts/init-test.sh
 
 script:
-  - cargo fmt --all -- --write-mode=diff
+  - cargo fmt --all -- --check
   - cargo test

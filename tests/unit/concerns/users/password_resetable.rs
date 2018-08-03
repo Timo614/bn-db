@@ -13,7 +13,8 @@ fn find_by_password_reset_token() {
     let user = User::create("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
         .commit(&project)
         .unwrap();
-    let user = user.create_password_reset_token(&project)
+    let user = user
+        .create_password_reset_token(&project)
         .expect("Failed to create reset token");
 
     let found_user =
@@ -42,7 +43,8 @@ fn consume_password_reset_token() {
         .commit(&project)
         .unwrap();
     let pw_modified_at = user.password_modified_at;
-    let user: User = user.create_password_reset_token(&project)
+    let user: User = user
+        .create_password_reset_token(&project)
         .expect("Failed to create reset token")
         .into();
     let password = "newPassword";

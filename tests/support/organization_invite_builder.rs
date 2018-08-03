@@ -1,20 +1,18 @@
-use bigneon_db::models::{
-    NewOrganizationInvite, Organization, OrganizationInvite, OrganizationUser, User,
-};
+use bigneon_db::models::{Organization, OrganizationInvite, User};
 use support::project::TestProject;
 use uuid::Uuid;
 extern crate chrono;
-use chrono::{Duration, NaiveDateTime, Utc};
+use chrono::NaiveDateTime;
 use support::organization_invite_builder::chrono::prelude::*;
 
 pub struct OrgInviteBuilder<'a> {
     organization_id: Option<Uuid>,
     invitee_id: Option<Uuid>,
     user_email: String,
-    created_on: NaiveDateTime,
+    create_at: NaiveDateTime,
     security_token: Option<Uuid>,
     user_id: Option<Uuid>,
-    status_changed_on: Option<NaiveDateTime>,
+    status_change_at: Option<NaiveDateTime>,
     accepted: Option<i16>,
     test_project: &'a TestProject,
 }
@@ -25,11 +23,11 @@ impl<'a> OrgInviteBuilder<'a> {
             organization_id: None,
             invitee_id: None,
             user_email: "test@test.com".into(),
-            created_on: NaiveDate::from_ymd(2016, 7, 8).and_hms(9, 10, 11),
+            create_at: NaiveDate::from_ymd(2016, 7, 8).and_hms(9, 10, 11),
             security_token: Some(Uuid::new_v4()),
             test_project: &test_project,
             user_id: None,
-            status_changed_on: None,
+            status_change_at: None,
             accepted: None,
         }
     }
@@ -50,7 +48,7 @@ impl<'a> OrgInviteBuilder<'a> {
     }
 
     pub fn update_status_changed(mut self, date: &NaiveDateTime) -> OrgInviteBuilder<'a> {
-        self.status_changed_on = Some(date.clone());
+        self.status_change_at = Some(date.clone());
         self
     }
 
@@ -60,7 +58,7 @@ impl<'a> OrgInviteBuilder<'a> {
     }
 
     pub fn finish(&self) -> OrganizationInvite {
-        let mut orginvite = OrganizationInvite::create(
+        let orginvite = OrganizationInvite::create(
             self.organization_id.unwrap(),
             self.invitee_id.unwrap(),
             &self.user_email,

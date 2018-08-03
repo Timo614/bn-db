@@ -1,13 +1,12 @@
 extern crate chrono;
 use bigneon_db::db::Connectable;
-use bigneon_db::models::{Organization, OrganizationInvite, User};
+use bigneon_db::models::OrganizationInvite;
 use bigneon_db::utils::errors::{DatabaseError, ErrorCode};
-use chrono::{Duration, NaiveDateTime, Utc};
+use chrono::{Duration, Utc};
 use diesel;
 use diesel::prelude::*;
 use support::project::TestProject;
 use unit::organization_invites::chrono::prelude::*;
-use uuid::Uuid;
 
 #[test]
 fn create() {
@@ -22,6 +21,27 @@ fn create() {
 
     assert_eq!(org_invite.organization_id, organization.id);
     assert_eq!(org_invite.invitee_id, user.id);
+}
+
+#[test]
+fn add_user_to_invite() {
+    let project = TestProject::new();
+    let user = project.create_user().finish();
+    let user2 = project.create_user().finish();
+    let organization = project.create_organization().with_owner(&user).finish();
+    let org_invite = project
+        .create_organization_invite()
+        .with_org(&organization)
+        .with_invitee(&user)
+        .finish();
+    let updated_invite = org_invite.add_user_id(&user2.id, &project).unwrap();
+    assert_eq!(updated_invite.user_id.unwrap(), user2.id);
+
+    let _updated_invite_done =
+        OrganizationInvite::get_get_invite_details(&org_invite.security_token.unwrap(), &project)
+            .unwrap();
+
+    assert_eq!(updated_invite.user_id.unwrap(), user2.id);
 }
 
 #[test]
@@ -71,7 +91,6 @@ fn change_invite_status_of_invite() {
 fn test_token_validity() {
     let project = TestProject::new();
     let user = project.create_user().finish();
-    let user2 = project.create_user().finish();
     let organization = project.create_organization().with_owner(&user).finish();
     let mut org_invite = project
         .create_organization_invite()
@@ -92,11 +111,9 @@ fn test_token_validity() {
         cause: Some("No valid token found, NotFound".into()),
     };
     match recovered_invite2 {
-        Ok(val) => assert_eq!(true, false), //this should not happen, so this should fail
+        Ok(_val) => assert_eq!(true, false), //this should not happen, so this should fail
         Err(val) => assert_eq!(error_value, val),
     }
-
-    //assert_eq!(recceived_error, recovered_invite2);
 }
 
 // dont want to update the details in the main function, so keeping this in the unit test section

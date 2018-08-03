@@ -10,8 +10,8 @@ use uuid::Uuid;
 
 const INVITE_EXPIRATION_PERIOD_IN_DAYS: i64 = 7;
 
-#[derive(Insertable, Queryable, Identifiable, PartialEq, Debug, Clone, Deserialize, AsChangeset,
-         QueryableByName)]
+#[derive(Insertable, Queryable, Identifiable, PartialEq, Debug, Clone, Serialize, Deserialize,
+         AsChangeset, QueryableByName)]
 #[table_name = "organization_invites"]
 pub struct OrganizationInvite {
     pub id: Uuid,
@@ -61,7 +61,7 @@ impl OrganizationInvite {
         }
     }
 
-    fn change_invite_status(
+    pub fn change_invite_status(
         &self,
         change_status: i16,
         conn: &Connectable,
@@ -100,6 +100,20 @@ impl OrganizationInvite {
                 "SELECT * FROM organization_invites WHERE security_token = '{}' AND create_at > '{}' AND accepted is NULL;"
                 ,token, expiredate //todo convert to use the .bind 
             )).get_result(conn.get_connection()),
+        )
+    }
+
+    pub fn add_user_id(
+        &self,
+        user_id: &Uuid,
+        conn: &Connectable,
+    ) -> Result<OrganizationInvite, DatabaseError> {
+        DatabaseError::wrap(
+            ErrorCode::UpdateError,
+            "Could not update organization invite table",
+            diesel::update(self)
+                .set((organization_invites::user_id.eq(user_id),))
+                .get_result(conn.get_connection()),
         )
     }
 }
