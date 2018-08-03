@@ -86,7 +86,7 @@ impl OrganizationInvite {
         self.change_invite_status(0, conn)
     }
 
-    pub fn get_get_invite_details(
+    pub fn get_invite_details(
         token: &Uuid,
         conn: &Connectable,
     ) -> Result<OrganizationInvite, DatabaseError> {

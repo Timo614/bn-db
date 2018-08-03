@@ -38,7 +38,7 @@ fn add_user_to_invite() {
     assert_eq!(updated_invite.user_id.unwrap(), user2.id);
 
     let _updated_invite_done =
-        OrganizationInvite::get_get_invite_details(&org_invite.security_token.unwrap(), &project)
+        OrganizationInvite::get_invite_details(&org_invite.security_token.unwrap(), &project)
             .unwrap();
 
     assert_eq!(updated_invite.user_id.unwrap(), user2.id);
@@ -98,13 +98,13 @@ fn test_token_validity() {
         .with_invitee(&user)
         .finish();
     let recovered_invite =
-        OrganizationInvite::get_get_invite_details(&org_invite.security_token.unwrap(), &project)
+        OrganizationInvite::get_invite_details(&org_invite.security_token.unwrap(), &project)
             .unwrap();
     assert_eq!(org_invite, recovered_invite);
     org_invite.create_at = NaiveDate::from_ymd(2016, 7, 8).and_hms(9, 10, 11);
     org_invite = update(&org_invite, &project).unwrap();
     let recovered_invite2 =
-        OrganizationInvite::get_get_invite_details(&org_invite.security_token.unwrap(), &project);
+        OrganizationInvite::get_invite_details(&org_invite.security_token.unwrap(), &project);
     let error_value = DatabaseError {
         code: 6000,
         message: "Access error".into(),
