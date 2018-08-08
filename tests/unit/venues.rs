@@ -81,9 +81,27 @@ fn create_find_via_org() {
     let organization = project.create_organization().with_owner(&user).finish();
 
     //Do linking
-    let _org_venue_link = updated_venue.add_to_organization(&organization.id, &project);
-    let _org_venue_link = updated_venue2.add_to_organization(&organization.id, &project);
+    let _org_venue_link = updated_venue
+        .add_to_organization(&organization.id, &project)
+        .unwrap();
+    let _org_venue_link = updated_venue2
+        .add_to_organization(&organization.id, &project)
+        .unwrap();
     let all_venues = vec![updated_venue, updated_venue2];
-    let found_venues = Venue::find_all_for_organization(&organization.id, &project).unwrap();
+
+    let found_venues = organization.venues(&project).unwrap();
     assert_eq!(found_venues, all_venues);
+    let found_venues = Venue::find_for_organization(organization.id, &project).unwrap();
+    assert_eq!(found_venues, all_venues);
+
+    // Add another venue for another org to make sure it isn't included
+    let other_venue = Venue::create("VenueNotInOrg").commit(&project).unwrap();
+    let organization2 = project.create_organization().with_owner(&user).finish();
+    other_venue
+        .add_to_organization(&organization2.id, &project)
+        .unwrap();
+
+    let found_venues = Venue::find_for_organization(organization.id, &project).unwrap();
+    assert_eq!(found_venues, all_venues);
+    assert!(!found_venues.contains(&other_venue));
 }

@@ -1,8 +1,8 @@
 use db::Connectable;
 use diesel;
 use diesel::prelude::*;
-use models::{OrganizationUser, User};
-use schema::{organization_users, organizations, users};
+use models::{OrganizationUser, OrganizationVenue, User, Venue};
+use schema::{organization_users, organization_venues, organizations, users, venues};
 use utils::errors::DatabaseError;
 use utils::errors::ErrorCode;
 use uuid::Uuid;
@@ -120,6 +120,20 @@ impl Organization {
         users.insert(0, organization_owner);
         users
     }
+
+    pub fn venues(&self, conn: &Connectable) -> Result<Vec<Venue>, DatabaseError> {
+        let organization_venues = OrganizationVenue::belonging_to(self);
+
+        DatabaseError::wrap(
+            ErrorCode::QueryError,
+            "Could not retrieve venues",
+            organization_venues
+                .inner_join(venues::table)
+                .select(venues::all_columns)
+                .load::<Venue>(conn.get_connection()),
+        )
+    }
+
     pub fn find(id: &Uuid, conn: &Connectable) -> Result<Organization, DatabaseError> {
         DatabaseError::wrap(
             ErrorCode::QueryError,

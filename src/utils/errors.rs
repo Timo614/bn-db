@@ -1,3 +1,6 @@
+use diesel::result::ConnectionError;
+use diesel::result::DatabaseErrorKind;
+use diesel::result::Error as DieselError;
 use serde::ser::{Serialize, SerializeStruct, Serializer};
 use std::error::Error;
 use std::fmt;
@@ -11,6 +14,7 @@ pub enum ErrorCode {
     InsertError,
     UpdateError,
     DeleteError,
+    DuplicateKeyError,
     ConnectionError,
     InternalError,
     AccessError,
@@ -27,6 +31,7 @@ pub fn get_error_message(code: ErrorCode) -> (i32, String) {
         InsertError => (3100, "Could not insert record"),
         UpdateError => (3200, "Could not update record"),
         DeleteError => (3300, "Could not delete record"),
+        DuplicateKeyError => (3400, "Duplicate key error"),
         ConnectionError => (4000, "Connection Error"),
         InternalError => (5000, "Internal error"),
         AccessError => (6000, "Access error"),
@@ -87,18 +92,39 @@ impl DatabaseError {
     }
 
     /// Wraps the error from a Result into a DatabaseError
-    pub fn wrap<T, E: Display>(
+    pub fn wrap<T>(
         error_code: ErrorCode,
         message: &str,
-        res: Result<T, E>,
+        res: Result<T, DieselError>,
     ) -> Result<T, DatabaseError> {
         match res {
             Ok(val) => Ok(val),
-            Err(e) => Err(DatabaseError::new(
-                error_code,
-                Some(&format!("{}, {}", message, e.to_string())),
-            )),
+            Err(e) => {
+                println!("PG Database error:{}", e.to_string());
+                match e {
+                    DieselError::DatabaseError(kind, _) => match kind {
+                        DatabaseErrorKind::UniqueViolation => Err(DatabaseError::new(
+                            ErrorCode::DuplicateKeyError,
+                            Some(&format!("{}, {}", message, e.to_string())),
+                        )),
+                        _ => Err(DatabaseError::new(
+                            error_code,
+                            Some(&format!("{}, {}", message, e.to_string())),
+                        )),
+                    },
+                    _ => Err(DatabaseError::new(
+                        error_code,
+                        Some(&format!("{}, {}", message, e.to_string())),
+                    )),
+                }
+            }
         }
+    }
+}
+
+impl From<ConnectionError> for DatabaseError {
+    fn from(e: ConnectionError) -> Self {
+        DatabaseError::new(ErrorCode::ConnectionError, Some(&e.to_string()))
     }
 }
 

@@ -38,13 +38,10 @@ fn find() {
         .commit(&project)
         .unwrap();
     //find organization linked to venue
-    let organization_id =
+    let organization_venue =
         OrganizationVenue::find_via_venue_all(&updated_venue.id, &project).unwrap();
-    assert_eq!(organization_id[0].organization_id, organization.id);
-    //find venue linked to organization
-    let venue_id =
-        OrganizationVenue::find_via_organization_all(&organization.id, &project).unwrap();
-    let found_venue = Venue::find(&venue_id[0].venue_id, &project).unwrap();
+    assert_eq!(organization_venue[0].organization_id, organization.id);
+    let found_venue = Venue::find(&organization_venue[0].venue_id, &project).unwrap();
     assert_eq!(found_venue, updated_venue);
 }
 #[test]
@@ -101,12 +98,4 @@ fn find_lists() {
         })
         .collect();
     assert_eq!(organization_ids, all_organizations);
-    //find venue linked to organization
-    let venue_ids =
-        OrganizationVenue::find_via_organization_all(&all_organizations[0], &project).unwrap();
-    let mut found_venue: Vec<Venue> = Vec::new();
-    for i in 0..=1 {
-        found_venue.push(Venue::find(&venue_ids[i].venue_id, &project).unwrap());
-    }
-    assert_eq!(found_venue, all_venues);
 }

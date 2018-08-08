@@ -1,5 +1,7 @@
 use bigneon_db::models::Roles;
 use bigneon_db::models::User;
+use bigneon_db::utils::errors;
+use bigneon_db::utils::errors::ErrorCode;
 use support::project::TestProject;
 use uuid::Uuid;
 
@@ -20,6 +22,23 @@ fn commit() {
     assert_ne!(user.hashed_pw, password);
     assert_eq!(user.hashed_pw.is_empty(), false);
     assert_eq!(user.id.to_string().is_empty(), false);
+}
+
+#[test]
+fn commit_duplicate_email() {
+    let project = TestProject::new();
+    let user1 = project.create_user().finish();
+    let name = "Jeff";
+    let email = &user1.email.unwrap();
+    let phone_number = "555-555-5555";
+    let password = "examplePassword";
+    let result = User::create(name, email, phone_number, password).commit(&project);
+
+    assert_eq!(result.is_err(), true);
+    assert_eq!(
+        result.err().unwrap().code,
+        errors::get_error_message(ErrorCode::DuplicateKeyError).0
+    );
 }
 
 #[test]

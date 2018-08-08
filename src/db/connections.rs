@@ -27,21 +27,21 @@ impl DatabaseConnection {
     pub fn new_from_env() -> Result<DatabaseConnection, DatabaseError> {
         dotenv().ok();
         // Required envars
-        let hostname = DatabaseError::wrap(
-            ErrorCode::MissingInput,
-            "PG_HOSTNAME must be defined.",
-            env::var("PG_HOSTNAME"),
-        )?;
-        let user = DatabaseError::wrap(
-            ErrorCode::MissingInput,
-            "PG_USER must be defined.",
-            env::var("PG_USER"),
-        )?;
-        let password = DatabaseError::wrap(
-            ErrorCode::MissingInput,
-            "PG_PASSWORD must be defined.",
-            env::var("PG_PASSWORD"),
-        )?;
+        let hostname = env::var("PG_HOSTNAME").map_err(|_| {
+            DatabaseError::new(
+                ErrorCode::MissingInput,
+                Some("PG_HOSTNAME must be defined."),
+            )
+        })?;
+        let user = env::var("PG_USER").map_err(|_| {
+            DatabaseError::new(ErrorCode::MissingInput, Some("PG_USER must be defined."))
+        })?;
+        let password = env::var("PG_PASSWORD").map_err(|_| {
+            DatabaseError::new(
+                ErrorCode::MissingInput,
+                Some("PG_PASSWORD must be defined."),
+            )
+        })?;
         // Optional envars
         let port = env::var("PG_PORT").unwrap_or("5432".into());
         let database = env::var("DATABASE_NAME").unwrap_or("bigneon".into());
@@ -51,11 +51,7 @@ impl DatabaseConnection {
     }
 
     pub fn new(connection_string: &str) -> Result<DatabaseConnection, DatabaseError> {
-        let connection = DatabaseError::wrap(
-            ErrorCode::ConnectionError,
-            "Could not connect to database",
-            PgConnection::establish(&connection_string),
-        )?;
+        let connection = PgConnection::establish(&connection_string)?;
         let db = DatabaseConnection {
             connection,
             connection_string: connection_string.into(),

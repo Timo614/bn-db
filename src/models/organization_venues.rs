@@ -74,18 +74,7 @@ impl OrganizationVenue {
                 .load(conn.get_connection()),
         )
     }
-    pub fn find_via_organization_all(
-        organization_id: &Uuid,
-        conn: &Connectable,
-    ) -> Result<Vec<OrganizationVenue>, DatabaseError> {
-        DatabaseError::wrap(
-            ErrorCode::QueryError,
-            "Error loading events via organization",
-            organization_venues::table
-                .filter(organization_venues::organization_id.eq(organization_id))
-                .load(conn.get_connection()),
-        )
-    }
+
     pub fn all(conn: &Connectable) -> Result<Vec<OrganizationVenue>, DatabaseError> {
         DatabaseError::wrap(
             ErrorCode::QueryError,

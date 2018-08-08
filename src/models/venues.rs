@@ -2,7 +2,7 @@ use db::Connectable;
 use diesel;
 use diesel::prelude::*;
 use models::OrganizationVenue;
-use schema::venues;
+use schema::{organization_venues, venues};
 use utils::errors::DatabaseError;
 use utils::errors::ErrorCode;
 use uuid::Uuid;
@@ -69,30 +69,18 @@ impl Venue {
         )
     }
 
-    //todo refactor function
-    pub fn find_all_for_organization(
-        organization_id: &Uuid,
+    pub fn find_for_organization(
+        organization_id: Uuid,
         conn: &Connectable,
     ) -> Result<Vec<Venue>, DatabaseError> {
-        let all_linked_organization_ids =
-            OrganizationVenue::find_via_organization_all(&organization_id, conn).unwrap();
-        let mut found_venues: Vec<Venue> = Vec::new();
-        let mut wrapped_results: Result<Vec<Venue>, DatabaseError> = Ok(Vec::new());
-        for i in 0..all_linked_organization_ids.len() {
-            let temp_venue = Venue::find(&all_linked_organization_ids[i].venue_id, conn);
-            match temp_venue {
-                Ok(val) => found_venues.push(val),
-                Err(e) => wrapped_results = Err(e),
-            }
-        }
-        match wrapped_results {
-            Err(e) => wrapped_results = Err(e), //some error found wrapping in erropr
-            _ => wrapped_results = Ok(found_venues), //no error found, returning result
-        }
         DatabaseError::wrap(
             ErrorCode::QueryError,
-            "Error loading events via organization",
-            wrapped_results,
+            "Could not retrieve venues",
+            organization_venues::table
+                .filter(organization_venues::organization_id.eq(organization_id))
+                .inner_join(venues::table)
+                .select(venues::all_columns)
+                .load::<Venue>(conn.get_connection()),
         )
     }
 
@@ -101,10 +89,13 @@ impl Venue {
         organization_id: &Uuid,
         conn: &Connectable,
     ) -> Result<OrganizationVenue, DatabaseError> {
-        DatabaseError::wrap(
-            ErrorCode::UpdateError,
-            "Could not update venue",
-            OrganizationVenue::create(*organization_id, self.id).commit(conn),
-        )
+        OrganizationVenue::create(*organization_id, self.id)
+            .commit(conn)
+            .map_err(|e| {
+                DatabaseError::new(
+                    ErrorCode::UpdateError,
+                    Some(&format!("Could not update venue:{}", e.cause.unwrap())),
+                )
+            })
     }
 }
