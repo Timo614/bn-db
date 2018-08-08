@@ -121,7 +121,7 @@ fn users() {
 }
 
 #[test]
-fn all() {
+fn all_linked_to_user() {
     let project = TestProject::new();
     let user = project.create_user().finish();
     let user2 = project.create_user().finish();
@@ -133,8 +133,26 @@ fn all() {
         .finish();
     let _org3 = project.create_organization().with_owner(&user2).finish();
 
-    let orgs = Organization::all(user.id, &project).unwrap();
+    let orgs = Organization::all_linked_to_user(user.id, &project).unwrap();
     let test_vec = vec![org1, org2];
+    assert_eq!(orgs, test_vec);
+}
+
+#[test]
+fn all() {
+    let project = TestProject::new();
+    let user = project.create_user().finish();
+    let user2 = project.create_user().finish();
+    let org1 = project.create_organization().with_owner(&user).finish();
+    let org2 = project
+        .create_organization()
+        .with_owner(&user2)
+        .with_user(&user)
+        .finish();
+    let org3 = project.create_organization().with_owner(&user2).finish();
+
+    let orgs = Organization::all(&project).unwrap();
+    let test_vec = vec![org1, org2, org3];
     assert_eq!(orgs, test_vec);
 }
 

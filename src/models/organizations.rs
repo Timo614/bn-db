@@ -143,7 +143,19 @@ impl Organization {
                 .first::<Organization>(conn.get_connection()),
         )
     }
-    pub fn all(user_id: Uuid, conn: &Connectable) -> Result<Vec<Organization>, DatabaseError> {
+
+    pub fn all(conn: &Connectable) -> Result<Vec<Organization>, DatabaseError> {
+        DatabaseError::wrap(
+            ErrorCode::QueryError,
+            "Unable to load all organizations",
+            organizations::table.load(conn.get_connection()),
+        )
+    }
+
+    pub fn all_linked_to_user(
+        user_id: Uuid,
+        conn: &Connectable,
+    ) -> Result<Vec<Organization>, DatabaseError> {
         let orgs = DatabaseError::wrap(
             ErrorCode::QueryError,
             "Unable to load all organizations",
