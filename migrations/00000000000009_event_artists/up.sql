@@ -9,3 +9,4 @@ CREATE TABLE event_artists (
 -- Indices
 CREATE INDEX index_event_artists_event_id ON event_artists (event_id);
 CREATE INDEX index_event_artists_artist_id ON event_artists (artist_id);
+CREATE UNIQUE INDEX index_event_artists_event_id_artist_id ON event_artists (event_id, artist_id);

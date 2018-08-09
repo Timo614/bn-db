@@ -6,4 +6,4 @@ CREATE TABLE organization_venues (
 );
 
 -- Indices
-CREATE INDEX index_organization_venues_organization_id_venue_id ON organization_venues (organization_id,venue_id);
+CREATE UNIQUE INDEX index_organization_venues_organization_id_venue_id ON organization_venues (organization_id,venue_id);

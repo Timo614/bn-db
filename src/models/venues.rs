@@ -1,6 +1,8 @@
 use db::Connectable;
 use diesel;
+use diesel::dsl::exists;
 use diesel::prelude::*;
+use diesel::select;
 use models::OrganizationVenue;
 use schema::{organization_venues, venues};
 use utils::errors::DatabaseError;
@@ -68,7 +70,7 @@ impl Venue {
     }
     pub fn find(id: &Uuid, conn: &Connectable) -> Result<Venue, DatabaseError> {
         DatabaseError::wrap(
-            ErrorCode::QueryError,
+            ErrorCode::NoResults,
             "Error loading veue",
             venues::table.find(id).first::<Venue>(conn.get_connection()),
         )
@@ -94,6 +96,22 @@ impl Venue {
                 .order_by(venues::name)
                 .select(venues::all_columns)
                 .load::<Venue>(conn.get_connection()),
+        )
+    }
+
+    pub fn has_organization(
+        &self,
+        organization_id: Uuid,
+        conn: &Connectable,
+    ) -> Result<bool, DatabaseError> {
+        DatabaseError::wrap(
+            ErrorCode::QueryError,
+            "Could not retrieve venues",
+            select(exists(
+                organization_venues::table
+                    .filter(organization_venues::organization_id.eq(organization_id))
+                    .filter(organization_venues::venue_id.eq(self.id)),
+            )).get_result(conn.get_connection()),
         )
     }
 

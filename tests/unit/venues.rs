@@ -1,5 +1,7 @@
 use bigneon_db::models::Venue;
+use bigneon_db::utils::errors::*;
 use support::project::TestProject;
+use uuid::Uuid;
 
 #[test]
 fn create() {
@@ -53,6 +55,32 @@ fn find() {
     let all_found_venues = Venue::all(&project).unwrap();
     let all_venues = vec![edited_venue, edited_venue2];
     assert_eq!(all_venues, all_found_venues);
+
+    // Venue should return no records found if record does not exist
+    let not_found_venue = Venue::find(&Uuid::new_v4(), &project);
+    let (code, _message) = get_error_message(ErrorCode::NoResults);
+    match not_found_venue {
+        Ok(_venue) => panic!("No venue expected"),
+        Err(e) => assert!(e.code == code),
+    }
+}
+
+#[test]
+fn has_organization() {
+    let project = TestProject::new();
+    let venue = Venue::create("Name").commit(&project).unwrap();
+    let user = project.create_user().finish();
+    let organization = project.create_organization().with_owner(&user).finish();
+    let organization2 = project.create_organization().with_owner(&user).finish();
+    assert!(!venue.has_organization(organization.id, &project).unwrap());
+    assert!(!venue.has_organization(organization2.id, &project).unwrap());
+
+    venue
+        .add_to_organization(&organization.id, &project)
+        .unwrap();
+
+    assert!(venue.has_organization(organization.id, &project).unwrap());
+    assert!(!venue.has_organization(organization2.id, &project).unwrap());
 }
 
 #[test]
