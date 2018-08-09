@@ -42,7 +42,7 @@ impl NewOrganization {
     }
 }
 
-#[derive(AsChangeset, Deserialize)]
+#[derive(AsChangeset, Default, Deserialize)]
 #[table_name = "organizations"]
 pub struct OrganizationEditableAttributes {
     pub name: Option<String>,
@@ -52,20 +52,6 @@ pub struct OrganizationEditableAttributes {
     pub country: Option<String>,
     pub zip: Option<String>,
     pub phone: Option<String>,
-}
-
-impl OrganizationEditableAttributes {
-    pub fn new() -> OrganizationEditableAttributes {
-        OrganizationEditableAttributes {
-            name: None,
-            address: None,
-            city: None,
-            state: None,
-            country: None,
-            zip: None,
-            phone: None,
-        }
-    }
 }
 
 impl Organization {

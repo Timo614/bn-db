@@ -1,5 +1,5 @@
 extern crate chrono;
-use bigneon_db::models::{Event, Venue};
+use bigneon_db::models::{Event, EventEditableAttributes, Venue};
 use support::project::TestProject;
 use unit::events::chrono::prelude::*;
 
@@ -28,7 +28,7 @@ fn update() {
 
     let user = project.create_user().finish();
     let organization = project.create_organization().with_owner(&user).finish();
-    let mut event = Event::create(
+    let event = Event::create(
         "newEvent",
         organization.id,
         venue.id,
@@ -36,9 +36,13 @@ fn update() {
     ).commit(&project)
         .unwrap();
     //Edit event
-    event.ticket_sell_date = NaiveDate::from_ymd(2017, 7, 8).and_hms(9, 10, 11);
-    let updated_event = Event::update(&event, &project).unwrap();
-    assert_eq!(event, updated_event);
+    let sell_date = NaiveDate::from_ymd(2017, 7, 8).and_hms(9, 10, 11);
+    let parameters = EventEditableAttributes {
+        ticket_sell_date: Some(sell_date),
+        ..Default::default()
+    };
+    let event = event.update(parameters, &project).unwrap();
+    assert_eq!(event.ticket_sell_date, sell_date);
 }
 
 #[test]
@@ -49,7 +53,7 @@ fn find_individuals() {
 
     let user = project.create_user().finish();
     let organization = project.create_organization().with_owner(&user).finish();
-    let mut event = Event::create(
+    let event = Event::create(
         "NewEvent",
         organization.id,
         venue.id,
@@ -57,12 +61,15 @@ fn find_individuals() {
     ).commit(&project)
         .unwrap();
     //Edit event
-    event.ticket_sell_date = NaiveDate::from_ymd(2017, 7, 8).and_hms(9, 10, 11);
-    let updated_event = Event::update(&event, &project).unwrap();
+    let parameters = EventEditableAttributes {
+        ticket_sell_date: Some(NaiveDate::from_ymd(2017, 7, 8).and_hms(9, 10, 11)),
+        ..Default::default()
+    };
+    let event = event.update(parameters, &project).unwrap();
 
     //find event
-    let found_event = Event::find(&updated_event.id, &project).unwrap();
-    assert_eq!(found_event, updated_event);
+    let found_event = Event::find(&event.id, &project).unwrap();
+    assert_eq!(found_event, event);
     //find event via organisation
     let found_event_via_organization =
         Event::find_all_events_from_organization(&found_event.organization_id, &project).unwrap();
@@ -70,8 +77,8 @@ fn find_individuals() {
 
     //find event via venue
     let found_event_via_venue =
-        Event::find_all_events_from_venue(&updated_event.venue_id, &project).unwrap();
-    assert_eq!(found_event_via_venue[0], updated_event);
+        Event::find_all_events_from_venue(&event.venue_id, &project).unwrap();
+    assert_eq!(found_event_via_venue[0], event);
 }
 
 #[test]
@@ -89,8 +96,11 @@ fn find_list() {
     ).commit(&project)
         .unwrap();
     //Edit event
-    event.ticket_sell_date = NaiveDate::from_ymd(2017, 7, 8).and_hms(9, 10, 11);
-    let updated_event = Event::update(&event, &project).unwrap();
+    let parameters = EventEditableAttributes {
+        ticket_sell_date: Some(NaiveDate::from_ymd(2017, 7, 8).and_hms(9, 10, 11)),
+        ..Default::default()
+    };
+    let event = event.update(parameters, &project).unwrap();
 
     //find more than one event
     let mut event2 = Event::create(
@@ -100,19 +110,22 @@ fn find_list() {
         NaiveDate::from_ymd(2016, 7, 8).and_hms(9, 10, 11),
     ).commit(&project)
         .unwrap();
-    event2.ticket_sell_date = NaiveDate::from_ymd(2018, 7, 8).and_hms(9, 10, 11);
-    let _updated_event2 = Event::update(&event2, &project).unwrap();
+    let parameters = EventEditableAttributes {
+        ticket_sell_date: Some(NaiveDate::from_ymd(2017, 7, 8).and_hms(9, 10, 11)),
+        ..Default::default()
+    };
+    let event2 = event2.update(parameters, &project).unwrap();
     let all_found_events = Event::all(&project).unwrap();
-    let all_events = vec![event, event2];
+    let all_events = vec![event.clone(), event2.clone()];
     assert_eq!(all_events, all_found_events);
 
     //find all events via organisation
     let found_event_via_organizations =
-        Event::find_all_events_from_organization(&updated_event.organization_id, &project).unwrap();
+        Event::find_all_events_from_organization(&event.organization_id, &project).unwrap();
     assert_eq!(found_event_via_organizations, all_events);
 
     //find all events via venue
     let found_event_via_venues =
-        Event::find_all_events_from_venue(&updated_event.venue_id, &project).unwrap();
+        Event::find_all_events_from_venue(&event.venue_id, &project).unwrap();
     assert_eq!(found_event_via_venues, all_events);
 }

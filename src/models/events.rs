@@ -10,7 +10,7 @@ use uuid::Uuid;
 
 #[derive(Associations, Identifiable, Queryable, AsChangeset)]
 #[belongs_to(Organization)]
-#[derive(Serialize, Deserialize, PartialEq, Debug)]
+#[derive(Clone, Serialize, Deserialize, PartialEq, Debug)]
 #[belongs_to(Venue)]
 #[table_name = "events"]
 pub struct Event {
@@ -30,6 +30,16 @@ pub struct NewEvent {
     pub organization_id: Uuid,
     pub venue_id: Uuid,
     pub event_start: NaiveDateTime,
+}
+
+#[derive(AsChangeset, Default, Deserialize)]
+#[table_name = "events"]
+pub struct EventEditableAttributes {
+    pub name: Option<String>,
+    pub organization_id: Option<Uuid>,
+    pub venue_id: Option<Uuid>,
+    pub ticket_sell_date: Option<NaiveDateTime>,
+    pub event_start: Option<NaiveDateTime>,
 }
 
 impl NewEvent {
@@ -58,15 +68,21 @@ impl Event {
             event_start: event_start,
         }
     }
-    pub fn update(&self, conn: &Connectable) -> Result<Event, DatabaseError> {
+
+    pub fn update(
+        &self,
+        attributes: EventEditableAttributes,
+        conn: &Connectable,
+    ) -> Result<Event, DatabaseError> {
         DatabaseError::wrap(
             ErrorCode::UpdateError,
             "Could not update event",
             diesel::update(self)
-                .set(self)
+                .set(attributes)
                 .get_result(conn.get_connection()),
         )
     }
+
     pub fn find(id: &Uuid, conn: &Connectable) -> Result<Event, DatabaseError> {
         DatabaseError::wrap(
             ErrorCode::QueryError,

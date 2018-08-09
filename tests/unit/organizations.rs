@@ -29,7 +29,7 @@ fn update() {
     edited_organization.zip = Some("0124".to_string());
     edited_organization.phone = Some("+27123456789".to_string());
 
-    let mut changed_attrs = OrganizationEditableAttributes::new();
+    let mut changed_attrs: OrganizationEditableAttributes = Default::default();
     changed_attrs.name = Some("Test Org".to_string());
     changed_attrs.address = Some("Test Address".to_string());
     changed_attrs.city = Some("Test Address".to_string());

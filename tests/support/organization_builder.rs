@@ -46,7 +46,7 @@ impl<'a> OrganizationBuilder<'a> {
                 .unwrap();
         }
         if self.use_address {
-            let mut attrs = OrganizationEditableAttributes::new();
+            let mut attrs: OrganizationEditableAttributes = Default::default();
 
             attrs.address = Some(<String>::from("Test Address"));
             attrs.city = Some(<String>::from("Test Address"));
