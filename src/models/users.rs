@@ -12,7 +12,8 @@ use uuid::Uuid;
 #[derive(Insertable, PartialEq, Debug)]
 #[table_name = "users"]
 pub struct NewUser {
-    pub name: String,
+    pub first_name: String,
+    pub last_name: String,
     pub email: Option<String>,
     pub phone: Option<String>,
     pub hashed_pw: String,
@@ -22,7 +23,8 @@ pub struct NewUser {
 #[derive(Queryable, Identifiable, PartialEq, Debug, Clone)]
 pub struct User {
     pub id: Uuid,
-    pub name: String,
+    pub first_name: String,
+    pub last_name: String,
     pub email: Option<String>,
     pub phone: Option<String>,
     pub hashed_pw: String,
@@ -38,7 +40,8 @@ pub struct User {
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 pub struct DisplayUser {
     pub id: Uuid,
-    pub name: String,
+    pub first_name: String,
+    pub last_name: String,
     pub email: Option<String>,
     pub phone: Option<String>,
     pub created_at: NaiveDateTime,
@@ -54,10 +57,17 @@ impl NewUser {
 }
 
 impl User {
-    pub fn create(name: &str, email: &str, phone: &str, password: &str) -> NewUser {
+    pub fn create(
+        first_name: &str,
+        last_name: &str,
+        email: &str,
+        phone: &str,
+        password: &str,
+    ) -> NewUser {
         let hash = PasswordHash::generate(password, None);
         NewUser {
-            name: String::from(name),
+            first_name: String::from(first_name),
+            last_name: String::from(last_name),
             email: Some(String::from(email)),
             phone: Some(String::from(phone)),
             hashed_pw: hash.to_string(),
@@ -108,6 +118,10 @@ impl User {
         self.into()
     }
 
+    pub fn full_name(&self) -> String {
+        vec![self.first_name.to_string(), self.last_name.to_string()].join(" ")
+    }
+
     pub fn add_external_login(
         &self,
         external_user_id: String,
@@ -126,7 +140,8 @@ impl User {
     ) -> Result<User, DatabaseError> {
         let hash = PasswordHash::generate("random", None);
         let new_user = NewUser {
-            name: String::from("Unknown"),
+            first_name: String::from("Unknown"),
+            last_name: String::from("Unknown"),
             email: None,
             phone: None,
             hashed_pw: hash.to_string(),
@@ -143,7 +158,8 @@ impl From<User> for DisplayUser {
     fn from(user: User) -> Self {
         DisplayUser {
             id: user.id,
-            name: user.name,
+            first_name: user.first_name,
+            last_name: user.last_name,
             email: user.email,
             phone: user.phone,
             created_at: user.created_at,

@@ -1,7 +1,8 @@
 -- Define the users table
 CREATE TABLE users (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-  name TEXT NOT NULL,
+  first_name TEXT NOT NULL,
+  last_name TEXT NOT NULL,
   email TEXT NULL UNIQUE,
   phone TEXT NULL,
   hashed_pw TEXT NOT NULL,

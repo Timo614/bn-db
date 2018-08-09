@@ -132,7 +132,7 @@ fn create_db_and_user(matches: &ArgMatches) {
     println!("Creating user");
 
     let db_connection = DatabaseConnection::new(conn_string).unwrap();
-    let user = models::User::create("System Administrator", username, phone, password)
+    let user = models::User::create("System", "Administrator", username, phone, password)
         .commit(&db_connection)
         .expect("Failed to create system admin");
     user.add_role(Roles::Admin, &db_connection)

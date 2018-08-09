@@ -8,15 +8,17 @@ use uuid::Uuid;
 #[test]
 fn commit() {
     let project = TestProject::new();
-    let name = "Jeff";
+    let first_name = "Jeff";
+    let last_name = "Wilco";
     let email = "jeff@tari.com";
     let phone_number = "555-555-5555";
     let password = "examplePassword";
-    let user = User::create(name, email, phone_number, password)
+    let user = User::create(first_name, last_name, email, phone_number, password)
         .commit(&project)
         .unwrap();
 
-    assert_eq!(user.name, name);
+    assert_eq!(user.first_name, first_name);
+    assert_eq!(user.last_name, last_name);
     assert_eq!(user.email, Some(email.to_string()));
     assert_eq!(user.phone, Some(phone_number.to_string()));
     assert_ne!(user.hashed_pw, password);
@@ -28,11 +30,13 @@ fn commit() {
 fn commit_duplicate_email() {
     let project = TestProject::new();
     let user1 = project.create_user().finish();
-    let name = "Jeff";
+    let first_name = "Jeff";
+    let last_name = "Wilco";
     let email = &user1.email.unwrap();
     let phone_number = "555-555-5555";
     let password = "examplePassword";
-    let result = User::create(name, email, phone_number, password).commit(&project);
+    let result =
+        User::create(first_name, last_name, email, phone_number, password).commit(&project);
 
     assert_eq!(result.is_err(), true);
     assert_eq!(
@@ -60,14 +64,27 @@ fn find() {
 }
 
 #[test]
+fn full_name() {
+    let project = TestProject::new();
+
+    let first_name = "Bob".to_string();
+    let last_name = "Jones".to_string();
+
+    let user = project
+        .create_user()
+        .with_first_name(first_name.clone())
+        .with_last_name(last_name.clone())
+        .finish();
+    assert_eq!(user.full_name(), format!("{} {}", first_name, last_name));
+}
+
+#[test]
 fn find_by_email() {
     let project = TestProject::new();
-    let email = "jeff@tari.com";
-    let user = User::create("Jeff", email, "555-555-5555", "examplePassword")
-        .commit(&project)
-        .unwrap();
+    let user = project.create_user().finish();
 
-    let found_user = User::find_by_email(&email, &project).expect("User was not found");
+    let found_user =
+        User::find_by_email(&user.email.clone().unwrap(), &project).expect("User was not found");
     assert_eq!(found_user.unwrap(), user);
 
     assert!(
