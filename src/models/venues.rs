@@ -70,8 +70,8 @@ impl Venue {
     }
     pub fn find(id: &Uuid, conn: &Connectable) -> Result<Venue, DatabaseError> {
         DatabaseError::wrap(
-            ErrorCode::NoResults,
-            "Error loading veue",
+            ErrorCode::QueryError,
+            "Error loading venue",
             venues::table.find(id).first::<Venue>(conn.get_connection()),
         )
     }

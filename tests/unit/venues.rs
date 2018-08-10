@@ -55,14 +55,6 @@ fn find() {
     let all_found_venues = Venue::all(&project).unwrap();
     let all_venues = vec![edited_venue, edited_venue2];
     assert_eq!(all_venues, all_found_venues);
-
-    // Venue should return no records found if record does not exist
-    let not_found_venue = Venue::find(&Uuid::new_v4(), &project);
-    let (code, _message) = get_error_message(ErrorCode::NoResults);
-    match not_found_venue {
-        Ok(_venue) => panic!("No venue expected"),
-        Err(e) => assert!(e.code == code),
-    }
 }
 
 #[test]
