@@ -1,9 +1,10 @@
+use chrono::NaiveDate;
 use chrono::NaiveDateTime;
 use db::Connectable;
 use diesel;
 use diesel::prelude::*;
-use models::{Organization, Venue};
-use schema::events;
+use models::{EventArtist, Organization, Venue};
+use schema::{artists, event_artists, events, venues};
 use utils::errors::DatabaseError;
 use utils::errors::ErrorCode;
 use uuid::Uuid;
@@ -115,13 +116,64 @@ impl Event {
         )
     }
 
-    pub fn all(conn: &Connectable) -> Result<Vec<Event>, DatabaseError> {
-        DatabaseError::wrap(
-            ErrorCode::QueryError,
-            "Unable to load all events",
-            events::table
-                .order_by(events::event_start.desc())
-                .load(conn.get_connection()),
-        )
+    pub fn search(
+        name_filter: Option<String>,
+        venue_filter: Option<String>,
+        artist_filter: Option<String>,
+        start_time: Option<NaiveDateTime>,
+        end_time: Option<NaiveDateTime>,
+        conn: &Connectable,
+    ) -> Result<Vec<Event>, DatabaseError> {
+        let name_like = match name_filter {
+            Some(n) => format!("%{}%", n),
+            None => "%".to_string(),
+        };
+        let venue_like = match venue_filter {
+            Some(n) => format!("%{}%", n),
+            None => "%".to_string(),
+        };
+        let artist_like = match artist_filter {
+            Some(n) => format!("%{}%", n),
+            None => "%".to_string(),
+        };
+
+        // TODO: This query relies on the fact that an event must have at least one artist.
+        let query = events::table
+            .filter(events::name.ilike(name_like))
+            .filter(
+                events::event_start
+                    .gt(start_time.unwrap_or(NaiveDate::from_ymd(1970, 1, 1).and_hms(0, 0, 0))),
+            )
+            .filter(
+                events::event_start
+                    .lt(end_time.unwrap_or(NaiveDate::from_ymd(3970, 1, 1).and_hms(0, 0, 0))),
+            )
+            .inner_join(
+                venues::table.on(events::venue_id
+                    .eq(venues::id)
+                    .and(venues::name.ilike(venue_like))),
+            )
+            .inner_join(
+                event_artists::table
+                    .inner_join(
+                        artists::table.on(event_artists::artist_id
+                            .eq(artists::id)
+                            .and(artists::name.ilike(artist_like))),
+                    )
+                    .on(events::id.eq(event_artists::event_id)),
+            )
+            .select(events::all_columns)
+            .distinct()
+            .order_by(events::event_start.asc())
+            .then_order_by(events::name.asc())
+            .load(conn.get_connection());
+
+        DatabaseError::wrap(ErrorCode::QueryError, "Unable to load all events", query)
+    }
+
+    pub fn add_artist(&self, artist_id: Uuid, conn: &Connectable) -> Result<(), DatabaseError> {
+        EventArtist::create(self.id, artist_id, 0)
+            .commit(conn)
+            .map(|_| ())
     }
 }

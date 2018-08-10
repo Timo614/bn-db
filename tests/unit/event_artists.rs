@@ -19,9 +19,9 @@ fn create() {
         .unwrap();
     let rank = 1;
 
-    let event_artist = EventArtist::new(event.id, artist.id, rank)
-        .unwrap()
-        .create(&project);
+    let event_artist = EventArtist::create(event.id, artist.id, rank)
+        .commit(&project)
+        .unwrap();
 
     assert_eq!(
         event_artist.event_id, event.id,

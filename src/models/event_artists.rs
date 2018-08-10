@@ -4,6 +4,7 @@ use diesel::prelude::*;
 use models::{Artist, Event};
 use schema::event_artists;
 use utils::errors::DatabaseError;
+use utils::errors::ErrorCode;
 use uuid::Uuid;
 
 #[derive(Associations, Identifiable, Queryable)]
@@ -26,24 +27,23 @@ pub struct NewEventArtist {
 }
 
 impl NewEventArtist {
-    pub fn create(&self, conn: &Connectable) -> EventArtist {
-        diesel::insert_into(event_artists::table)
-            .values(self)
-            .get_result(conn.get_connection())
-            .expect("Error creating new event artist")
+    pub fn commit(&self, conn: &Connectable) -> Result<EventArtist, DatabaseError> {
+        DatabaseError::wrap(
+            ErrorCode::InsertError,
+            "Could not add artist to event",
+            diesel::insert_into(event_artists::table)
+                .values(self)
+                .get_result(conn.get_connection()),
+        )
     }
 }
 
 impl EventArtist {
-    pub fn new(
-        event_id: Uuid,
-        artist_id: Uuid,
-        rank: i32,
-    ) -> Result<NewEventArtist, DatabaseError> {
-        Ok(NewEventArtist {
-            event_id: event_id,
-            artist_id: artist_id,
-            rank: rank,
-        })
+    pub fn create(event_id: Uuid, artist_id: Uuid, rank: i32) -> NewEventArtist {
+        NewEventArtist {
+            event_id,
+            artist_id,
+            rank,
+        }
     }
 }
