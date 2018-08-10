@@ -10,9 +10,7 @@ use uuid::Uuid;
 #[test]
 fn find_by_password_reset_token() {
     let project = TestProject::new();
-    let user = User::create("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
-        .commit(&project)
-        .unwrap();
+    let user = project.create_user().finish();
     let user = user
         .create_password_reset_token(&project)
         .expect("Failed to create reset token");
@@ -39,9 +37,7 @@ fn find_by_password_reset_token() {
 fn consume_password_reset_token() {
     use bigneon_db::schema::users::dsl::*;
     let project = TestProject::new();
-    let user = User::create("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
-        .commit(&project)
-        .unwrap();
+    let user = project.create_user().finish();
     let pw_modified_at = user.password_modified_at;
     let user: User = user
         .create_password_reset_token(&project)
@@ -99,9 +95,7 @@ fn consume_password_reset_token() {
 #[test]
 fn create_password_reset_token() {
     let project = TestProject::new();
-    let user = User::create("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
-        .commit(&project)
-        .unwrap();
+    let user = project.create_user().finish();
     assert!(user.password_reset_token.is_none());
     assert!(user.password_reset_requested_at.is_none());
 
@@ -113,9 +107,7 @@ fn create_password_reset_token() {
 #[test]
 fn has_valid_password_reset_token() {
     let project = TestProject::new();
-    let mut user = User::create("Jeff", "jeff@tari.com", "555-555-5555", "examplePassword")
-        .commit(&project)
-        .unwrap();
+    let mut user = project.create_user().finish();
 
     // Expired token
     user.password_reset_token = Some(Uuid::new_v4());
