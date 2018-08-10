@@ -28,6 +28,12 @@ pub struct Organization {
 pub struct NewOrganization {
     pub owner_user_id: Uuid,
     pub name: String,
+    pub address: Option<String>,
+    pub city: Option<String>,
+    pub state: Option<String>,
+    pub country: Option<String>,
+    pub zip: Option<String>,
+    pub phone: Option<String>,
 }
 
 impl NewOrganization {
@@ -59,6 +65,12 @@ impl Organization {
         NewOrganization {
             owner_user_id: owner_user_id,
             name: name.into(),
+            address: None,
+            city: None,
+            state: None,
+            country: None,
+            zip: None,
+            phone: None,
         }
     }
 

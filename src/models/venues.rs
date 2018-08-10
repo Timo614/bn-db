@@ -25,6 +25,12 @@ pub struct Venue {
 #[table_name = "venues"]
 pub struct NewVenue {
     pub name: String,
+    pub address: Option<String>,
+    pub city: Option<String>,
+    pub state: Option<String>,
+    pub country: Option<String>,
+    pub zip: Option<String>,
+    pub phone: Option<String>,
 }
 
 impl NewVenue {
@@ -43,6 +49,12 @@ impl Venue {
     pub fn create(name: &str) -> NewVenue {
         NewVenue {
             name: String::from(name),
+            address: None,
+            city: None,
+            state: None,
+            country: None,
+            zip: None,
+            phone: None,
         }
     }
     pub fn update(&self, conn: &Connectable) -> Result<Venue, DatabaseError> {
