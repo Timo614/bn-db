@@ -91,6 +91,7 @@ impl Venue {
             organization_venues::table
                 .filter(organization_venues::organization_id.eq(organization_id))
                 .inner_join(venues::table)
+                .order_by(venues::name)
                 .select(venues::all_columns)
                 .load::<Venue>(conn.get_connection()),
         )

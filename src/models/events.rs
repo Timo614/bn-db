@@ -132,12 +132,7 @@ impl Event {
             Some(n) => format!("%{}%", n),
             None => "%".to_string(),
         };
-        let artist_like = match artist_filter {
-            Some(n) => format!("%{}%", n),
-            None => "%".to_string(),
-        };
 
-        // TODO: This query relies on the fact that an event must have at least one artist.
         let query = events::table
             .filter(events::name.ilike(name_like))
             .filter(
@@ -152,21 +147,34 @@ impl Event {
                 venues::table.on(events::venue_id
                     .eq(venues::id)
                     .and(venues::name.ilike(venue_like))),
-            )
-            .inner_join(
-                event_artists::table
+            );
+
+        let query = match artist_filter {
+            None => query
+                .select(events::all_columns)
+                .distinct()
+                .order_by(events::event_start.asc())
+                .then_order_by(events::name.asc())
+                .load(conn.get_connection()),
+            Some(l) => {
+                let l = format!("%{}%", l);
+                query
                     .inner_join(
-                        artists::table.on(event_artists::artist_id
-                            .eq(artists::id)
-                            .and(artists::name.ilike(artist_like))),
+                        event_artists::table
+                            .inner_join(
+                                artists::table.on(event_artists::artist_id
+                                    .eq(artists::id)
+                                    .and(artists::name.ilike(l))),
+                            )
+                            .on(events::id.eq(event_artists::event_id)),
                     )
-                    .on(events::id.eq(event_artists::event_id)),
-            )
-            .select(events::all_columns)
-            .distinct()
-            .order_by(events::event_start.asc())
-            .then_order_by(events::name.asc())
-            .load(conn.get_connection());
+                    .select(events::all_columns)
+                    .distinct()
+                    .order_by(events::event_start.asc())
+                    .then_order_by(events::name.asc())
+                    .load(conn.get_connection())
+            }
+        };
 
         DatabaseError::wrap(ErrorCode::QueryError, "Unable to load all events", query)
     }
