@@ -14,7 +14,7 @@ const INVITE_EXPIRATION_PERIOD_IN_DAYS: i64 = 7;
 pub struct OrganizationInvite {
     pub id: Uuid,
     pub organization_id: Uuid,
-    pub invitee_id: Uuid,
+    pub inviter_id: Uuid,
     pub user_email: String,
     pub create_at: NaiveDateTime,
     pub security_token: Option<Uuid>,
@@ -27,7 +27,7 @@ pub struct OrganizationInvite {
 #[table_name = "organization_invites"]
 pub struct NewOrganizationInvite {
     pub organization_id: Uuid,
-    pub invitee_id: Uuid,
+    pub inviter_id: Uuid,
     pub user_email: String,
     pub security_token: Option<Uuid>,
     pub user_id: Option<Uuid>,
@@ -52,7 +52,7 @@ impl OrganizationInvite {
     ) -> NewOrganizationInvite {
         NewOrganizationInvite {
             organization_id: org_id,
-            invitee_id: invitee_id,
+            inviter_id: invitee_id,
             user_email: email.into(),
             security_token: None,
             user_id: user_id,

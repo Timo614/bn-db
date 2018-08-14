@@ -2,7 +2,7 @@
 CREATE TABLE organization_invites (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
   organization_id uuid NOT NULL REFERENCES organizations (id),
-  invitee_id uuid NOT NULL REFERENCES users (id),
+  inviter_id uuid NOT NULL REFERENCES users (id),
   user_email TEXT NOT NULL,
   create_at TIMESTAMP NOT NULL DEFAULT now(),
   security_token uuid UNIQUE,
@@ -13,6 +13,6 @@ CREATE TABLE organization_invites (
 
 -- Indices
 CREATE INDEX index_organization_invites_organization_id ON organization_invites (organization_id);
-CREATE INDEX index_organization_invites_user_id ON organization_invites (invitee_id);
+CREATE INDEX index_organization_invites_user_id ON organization_invites (inviter_id);
 CREATE INDEX index_organization_invitee_user_id ON organization_invites (user_id);
 CREATE INDEX security_token ON organization_invites (security_token);

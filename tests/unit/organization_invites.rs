@@ -20,7 +20,7 @@ fn create() {
         .finish();
 
     assert_eq!(org_invite.organization_id, organization.id);
-    assert_eq!(org_invite.invitee_id, user.id);
+    assert_eq!(org_invite.inviter_id, user.id);
 }
 
 #[test]

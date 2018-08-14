@@ -59,7 +59,7 @@ table! {
     organization_invites (id) {
         id -> Uuid,
         organization_id -> Uuid,
-        invitee_id -> Uuid,
+        inviter_id -> Uuid,
         user_email -> Text,
         create_at -> Timestamp,
         security_token -> Nullable<Uuid>,
